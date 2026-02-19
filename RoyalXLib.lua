@@ -29,68 +29,95 @@ function Library:CreateWindow()
     ScreenGui.ResetOnSpawn = false
     ScreenGui.IgnoreGuiInset = true
 
+    local LogoBtn = Instance.new("ImageButton", ScreenGui)
+    LogoBtn.Size = UDim2.new(0, 50, 0, 50)
+    LogoBtn.Position = UDim2.new(0, 50, 0, 150)
+    LogoBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    LogoBtn.Image = "rbxassetid://107831103893115"
+    LogoBtn.Visible = false
+    Instance.new("UICorner", LogoBtn).CornerRadius = UDim.new(0, 10)
+    MakeDraggable(LogoBtn)
+
     local Main = Instance.new("Frame", ScreenGui)
     Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.Size = UDim2.new(0, 600, 0, 400)
+    Main.Size = UDim2.new(0, 0, 0, 0)
     Main.ClipsDescendants = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
     MakeDraggable(Main)
 
+    TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
+
     local ModalFrame = Instance.new("TextButton", Main)
     ModalFrame.Size = UDim2.new(0,0,0,0); ModalFrame.Modal = true 
 
-    -- 3. THANH TAB BAR CỐ ĐỊNH
+    -- [[ THANH TAB BAR - ĐÃ TĂNG LÊN 40 ]]
     local TabBar = Instance.new("Frame", Main)
-    TabBar.Size = UDim2.new(1, -20, 0, 40)
+    TabBar.Size = UDim2.new(1, -20, 0, 40) -- Kích thước 40px
     TabBar.Position = UDim2.new(0, 10, 0, 10)
     TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
     Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 6)
 
-    -- LOGO (CỐ ĐỊNH TẠI CHỖ)
+    -- LOGO TRONG TAB (Cũng to lên cho cân xứng)
     local InnerLogo = Instance.new("ImageLabel", TabBar)
-    InnerLogo.Size = UDim2.new(0, 30, 0, 30)
-    InnerLogo.Position = UDim2.new(0, 6, 0.5, -12)
+    InnerLogo.Size = UDim2.new(0, 28, 0, 28)
+    InnerLogo.Position = UDim2.new(0, 6, 0.5, -14)
     InnerLogo.BackgroundTransparency = 1
     InnerLogo.Image = "rbxassetid://107831103893115"
 
-    -- THANH CUỘN TAB (CHỈ VUỐT NGANG)
     local TabScroll = Instance.new("ScrollingFrame", TabBar)
-    TabScroll.Size = UDim2.new(1, -75, 1, 0) -- Trừa chỗ cho Logo và nút Close
-    TabScroll.Position = UDim2.new(0, 38, 0, 0)
+    TabScroll.Size = UDim2.new(1, -85, 1, 0)
+    TabScroll.Position = UDim2.new(0, 42, 0, 0)
     TabScroll.BackgroundTransparency = 1
     TabScroll.ScrollBarThickness = 0
-    TabScroll.ScrollingDirection = Enum.ScrollingDirection.X -- KHÓA CỨNG HƯỚNG X
-    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0) -- KHÔNG CHO GIÃN Y
-    TabScroll.AutomaticCanvasSize = Enum.AutomaticSize.X -- TỰ ĐỘNG GIÃN X
-    TabScroll.ElasticBehavior = Enum.ElasticBehavior.Never -- TẮT ĐỘ NẨY LỆCH
+    TabScroll.ScrollingDirection = Enum.ScrollingDirection.X 
+    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
+    TabScroll.ElasticBehavior = Enum.ElasticBehavior.Never
 
     local TabList = Instance.new("UIListLayout", TabScroll)
-    TabList.FillDirection = Enum.FillDirection.Horizontal
-    TabList.VerticalAlignment = Enum.VerticalAlignment.Center
-    TabList.Padding = UDim.new(0, 6)
+    TabList.FillDirection = Enum.FillDirection.Horizontal; TabList.VerticalAlignment = Enum.VerticalAlignment.Center; TabList.Padding = UDim.new(0, 6)
 
-    -- NÚT ĐÓNG
     local Close = Instance.new("TextButton", TabBar)
-    Close.Size = UDim2.new(0, 30, 1, 0)
-    Close.Position = UDim2.new(1, -30, 0, 0)
+    Close.Size = UDim2.new(0, 35, 1, 0)
+    Close.Position = UDim2.new(1, -35, 0, 0)
     Close.Text = "×"; Close.TextColor3 = Color3.fromRGB(255, 80, 80)
-    Close.BackgroundTransparency = 1; Close.Font = Enum.Font.GothamBold; Close.TextSize = 20
+    Close.BackgroundTransparency = 1; Close.Font = Enum.Font.GothamBold; Close.TextSize = 22
 
+    local function ToggleUI()
+        if Main.Visible then
+            local t = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+            t:Play()
+            t.Completed:Connect(function()
+                Main.Visible = false; LogoBtn.Visible = true
+                LogoBtn.Size = UDim2.new(0, 0, 0, 0)
+                TweenService:Create(LogoBtn, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 50, 0, 50)}):Play()
+            end)
+        else
+            TweenService:Create(LogoBtn, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+            task.wait(0.2)
+            LogoBtn.Visible = false; Main.Visible = true
+            TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
+        end
+    end
+    Close.MouseButton1Click:Connect(ToggleUI)
+    LogoBtn.MouseButton1Click:Connect(ToggleUI)
+
+    -- [[ CONTAINER NỘI DUNG - DỊCH XUỐNG ĐỂ KHÔNG CHẠM TAB 40 ]]
     local Container = Instance.new("Frame", Main)
-    Container.Position = UDim2.new(0, 10, 0, 55)
-    Container.Size = UDim2.new(1, -20, 1, -65)
+    Container.Position = UDim2.new(0, 10, 0, 60) -- Dịch từ 55 xuống 60
+    Container.Size = UDim2.new(1, -20, 1, -70)
     Container.BackgroundTransparency = 1
 
     local Window = {CurrentTab = nil}
 
     function Window:CreateTab(name)
         local TBtn = Instance.new("TextButton", TabScroll)
-        TBtn.Size = UDim2.new(0, 90, 0, 26) -- Nút tab cố định kích thước dọc
+        TBtn.Size = UDim2.new(0, 95, 0, 30) -- Nút tab cũng to lên một chút (30px)
         TBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         TBtn.Text = name; TBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-        TBtn.Font = Enum.Font.GothamBold; TBtn.TextSize = 11
+        TBtn.Font = Enum.Font.GothamBold; TBtn.TextSize = 12 -- Chữ to lên cho dễ đọc
         Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 4)
 
         local Page = Instance.new("Frame", Container)
@@ -100,16 +127,11 @@ function Library:CreateWindow()
             local Col = Instance.new("ScrollingFrame", Page)
             Col.Size = UDim2.new(0.5, -5, 1, 0); Col.Position = pos
             Col.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-            Col.ScrollBarThickness = 0
-            Col.AutomaticCanvasSize = Enum.AutomaticSize.Y
-            Col.CanvasSize = UDim2.new(0, 0, 0, 0)
-            Col.ScrollingDirection = Enum.ScrollingDirection.Y
+            Col.ScrollBarThickness = 0; Col.AutomaticCanvasSize = Enum.AutomaticSize.Y
+            Col.CanvasSize = UDim2.new(0, 0, 0, 0); Col.ScrollingDirection = Enum.ScrollingDirection.Y
             Instance.new("UICorner", Col).CornerRadius = UDim.new(0, 8)
-            
-            local L = Instance.new("UIListLayout", Col)
-            L.Padding = UDim.new(0, 8); L.HorizontalAlignment = Enum.HorizontalAlignment.Center
+            local L = Instance.new("UIListLayout", Col); L.Padding = UDim.new(0, 8); L.HorizontalAlignment = Enum.HorizontalAlignment.Center
             Instance.new("UIPadding", Col).PaddingTop = UDim.new(0, 8)
-            
             L:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
                 Col.ScrollingEnabled = L.AbsoluteContentSize.Y > Col.AbsoluteSize.Y
             end)
@@ -124,9 +146,7 @@ function Library:CreateWindow()
                 Window.CurrentTab.P.Visible = false 
                 Window.CurrentTab.B.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
             end
-            Page.Visible = true
-            TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            Window.CurrentTab = {P = Page, B = TBtn}
+            Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50); Window.CurrentTab = {P = Page, B = TBtn}
         end)
         if not Window.CurrentTab then Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50); Window.CurrentTab = {P = Page, B = TBtn} end
 
@@ -137,18 +157,13 @@ function Library:CreateWindow()
             Sec.Size = UDim2.new(0.94, 0, 0, 40)
             Sec.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 6)
-            
             local sTitle = Instance.new("TextLabel", Sec)
             sTitle.Text = "  " .. title:upper(); sTitle.Size = UDim2.new(1, 0, 0, 28); sTitle.TextColor3 = Color3.new(1,1,1)
             sTitle.Font = Enum.Font.GothamBold; sTitle.TextSize = 11; sTitle.BackgroundTransparency = 1; sTitle.TextXAlignment = 0
-
             local sCont = Instance.new("Frame", Sec)
             sCont.Position = UDim2.new(0, 10, 0, 32); sCont.Size = UDim2.new(1, -20, 0, 0); sCont.BackgroundTransparency = 1
             local L = Instance.new("UIListLayout", sCont); L.Padding = UDim.new(0, 6)
-
-            L:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                Sec.Size = UDim2.new(0.94, 0, 0, L.AbsoluteContentSize.Y + 40)
-            end)
+            L:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Sec.Size = UDim2.new(0.94, 0, 0, L.AbsoluteContentSize.Y + 40) end)
 
             local Ele = {}
             function Ele:CreateToggle(text, def, cb)
@@ -156,26 +171,21 @@ function Library:CreateWindow()
                 local Tgl = Instance.new("TextButton", sCont)
                 Tgl.Size = UDim2.new(1, 0, 0, 26); Tgl.BackgroundTransparency = 1
                 Tgl.Text = "  " .. text; Tgl.TextColor3 = Color3.new(0.8, 0.8, 0.8); Tgl.TextXAlignment = 0; Tgl.Font = Enum.Font.Gotham; Tgl.TextSize = 12
-
                 local Bg = Instance.new("Frame", Tgl)
                 Bg.Size = UDim2.new(0, 34, 0, 18); Bg.Position = UDim2.new(1, -36, 0.5, -9)
                 Bg.BackgroundColor3 = state and Color3.new(0, 1, 1) or Color3.new(0.2, 0.2, 0.2)
                 Instance.new("UICorner", Bg).CornerRadius = UDim.new(1, 0)
-
                 local Dot = Instance.new("Frame", Bg)
                 Dot.Size = UDim2.new(0, 14, 0, 14); Dot.Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)
                 Dot.BackgroundColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", Dot).CornerRadius = UDim.new(1, 0)
-
                 local Check = Instance.new("TextLabel", Dot)
                 Check.Text = "✓"; Check.Size = UDim2.new(1, 0, 1, 0); Check.BackgroundTransparency = 1
                 Check.Visible = state; Check.TextColor3 = Color3.new(0, 0.7, 0.7); Check.Font = Enum.Font.GothamBold; Check.TextSize = 10
-
                 Tgl.MouseButton1Click:Connect(function()
                     state = not state
                     TweenService:Create(Bg, TweenInfo.new(0.2), {BackgroundColor3 = state and Color3.new(0, 1, 1) or Color3.new(0.2, 0.2, 0.2)}):Play()
                     TweenService:Create(Dot, TweenInfo.new(0.2), {Position = state and UDim2.new(1, -16, 0.5, -7) or UDim2.new(0, 2, 0.5, -7)}):Play()
-                    Check.Visible = state
-                    cb(state)
+                    Check.Visible = state; cb(state)
                 end)
             end
             return Ele
