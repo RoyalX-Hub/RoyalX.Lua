@@ -181,4 +181,4 @@ function Library:CreateWindow()
     return Window
 end
 
-return Libraryreturn Library
+return Library
