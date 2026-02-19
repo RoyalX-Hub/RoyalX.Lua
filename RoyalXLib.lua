@@ -24,22 +24,24 @@ end
 
 function Library:CreateWindow()
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
-    ScreenGui.Name = "RoyalX_Hub_Final"
+    ScreenGui.Name = "RoyalX_Hub_Official"
+    ScreenGui.ResetOnSpawn = false
 
-    -- 1. NÚT LOGO MỞ MENU (CÓ THỂ KÉO)
+    -- 1. NÚT LOGO MỞ MENU (KHÔNG TRƯỢT - CÓ THỂ KÉO)
     local LogoBtn = Instance.new("ImageButton", ScreenGui)
-    LogoBtn.Size = UDim2.size(50, 50)
+    LogoBtn.Size = UDim2.new(0, 50, 0, 50)
     LogoBtn.Position = UDim2.new(0, 20, 0, 150)
     LogoBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     LogoBtn.Image = "rbxassetid://107831103893115"
-    LogoBtn.Visible = false
+    LogoBtn.Visible = false -- Mặc định ẩn khi menu đang mở
     LogoBtn.ZIndex = 100
     Instance.new("UICorner", LogoBtn).CornerRadius = UDim.new(0, 10)
     MakeDraggable(LogoBtn)
 
     -- 2. KHUNG CHÍNH (ĐEN CHỦ ĐẠO)
     local Main = Instance.new("Frame", ScreenGui)
-    Main.BackgroundColor3 = Color3.fromRGB(5, 5, 5) -- Đen sâu
+    Main.Name = "MainFrame"
+    Main.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Size = UDim2.new(0, 650, 0, 450)
@@ -53,7 +55,7 @@ function Library:CreateWindow()
     TabBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 8)
 
-    -- Logo cố định góc trái
+    -- Logo thương hiệu (Cố định góc trái)
     local MenuLogo = Instance.new("ImageLabel", TabBar)
     MenuLogo.Size = UDim2.new(0, 32, 0, 32)
     MenuLogo.Position = UDim2.new(0, 8, 0.5, -16)
@@ -61,7 +63,7 @@ function Library:CreateWindow()
     MenuLogo.Image = "rbxassetid://107831103893115"
     MenuLogo.ZIndex = 5
 
-    -- Vùng trượt Tab
+    -- Vùng trượt Tab (Bắt đầu sau logo)
     local TabScroll = Instance.new("ScrollingFrame", TabBar)
     TabScroll.Size = UDim2.new(1, -95, 1, 0)
     TabScroll.Position = UDim2.new(0, 48, 0, 0)
@@ -87,13 +89,18 @@ function Library:CreateWindow()
     Container.Size = UDim2.new(1, -20, 1, -75)
     Container.BackgroundTransparency = 1
 
-    -- Logic Đóng/Mở
+    -- Logic Đóng/Mở Mượt
     local function ToggleUI()
         if Main.Visible then
             TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-            task.wait(0.2); Main.Visible = false; LogoBtn.Visible = true
+            task.wait(0.3)
+            Main.Visible = false
+            LogoBtn.Visible = true
+            LogoBtn.Size = UDim2.new(0,0,0,0)
+            TweenService:Create(LogoBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0, 50, 0, 50)}):Play()
         else
-            LogoBtn.Visible = false; Main.Visible = true
+            LogoBtn.Visible = false
+            Main.Visible = true
             TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 650, 0, 450)}):Play()
         end
     end
@@ -107,7 +114,7 @@ function Library:CreateWindow()
         TBtn.Size = UDim2.new(0, 110, 0, 32)
         TBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         TBtn.Text = name; TBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        TBtn.Font = Enum.Font.GothamBold; TBtn.TextSize = 14
+        TBtn.Font = Enum.Font.GothamBold; TBtn.TextSize = 13
         Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 6)
 
         local Page = Instance.new("Frame", Container)
@@ -116,11 +123,18 @@ function Library:CreateWindow()
         local function CreateColumn(pos)
             local Col = Instance.new("ScrollingFrame", Page)
             Col.Size = UDim2.new(0.5, -7, 1, 0); Col.Position = pos
-            Col.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- Đen nhạt
+            Col.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
             Col.ScrollBarThickness = 0
+            Col.CanvasSize = UDim2.new(0, 0, 0, 0)
+            Col.AutomaticCanvasSize = Enum.AutomaticSize.Y
             Instance.new("UICorner", Col).CornerRadius = UDim.new(0, 10)
+            
             local Layout = Instance.new("UIListLayout", Col)
             Layout.Padding = UDim.new(0, 10); Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+            
+            local Padding = Instance.new("UIPadding", Col)
+            Padding.PaddingTop = UDim.new(0, 10); Padding.PaddingBottom = UDim.new(0, 10)
+            
             return Col
         end
 
@@ -150,15 +164,13 @@ function Library:CreateWindow()
             Sec.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 8)
             
-            -- TIÊU ĐỀ TRẮNG, CĂN GIỮA, VIẾT HOA
             local sTitle = Instance.new("TextLabel", Sec)
             sTitle.Text = title:upper()
             sTitle.Size = UDim2.new(1, 0, 0, 35)
             sTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            sTitle.Font = Enum.Font.GothamBold; sTitle.TextSize = 15
+            sTitle.Font = Enum.Font.GothamBold; sTitle.TextSize = 14
             sTitle.BackgroundTransparency = 1; sTitle.TextXAlignment = Enum.TextXAlignment.Center
 
-            -- THANH GẠCH NGANG XÁM (NHƯ HÌNH)
             local Line = Instance.new("Frame", Sec)
             Line.Size = UDim2.new(0.4, 0, 0, 1)
             Line.Position = UDim2.new(0.5, 0, 0, 32); Line.AnchorPoint = Vector2.new(0.5, 0)
@@ -174,13 +186,12 @@ function Library:CreateWindow()
             end)
 
             local Ele = {}
-            -- TOGGLE HÌNH VUÔNG CHUẨN MÀU
             function Ele:CreateToggle(text, def, cb)
                 local state = def
                 local Tgl = Instance.new("TextButton", sCont)
                 Tgl.Size = UDim2.new(1, 0, 0, 30); Tgl.BackgroundTransparency = 1
                 Tgl.Text = " " .. text; Tgl.TextColor3 = Color3.fromRGB(255, 255, 255)
-                Tgl.TextXAlignment = 0; Tgl.Font = Enum.Font.Gotham; Tgl.TextSize = 14
+                Tgl.TextXAlignment = 0; Tgl.Font = Enum.Font.Gotham; Tgl.TextSize = 13
 
                 local Box = Instance.new("Frame", Tgl)
                 Box.Position = UDim2.new(1, -25, 0.5, -10); Box.Size = UDim2.new(0, 20, 0, 20)
