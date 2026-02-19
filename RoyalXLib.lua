@@ -29,40 +29,88 @@ function Library:CreateWindow()
     ScreenGui.ResetOnSpawn = false
     ScreenGui.IgnoreGuiInset = true
 
+    -- Nút Logo mở lại Menu (Khi đóng)
+    local LogoBtn = Instance.new("ImageButton", ScreenGui)
+    LogoBtn.Size = UDim2.new(0, 0, 0, 0)
+    LogoBtn.Position = UDim2.new(0, 50, 0, 150)
+    LogoBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    LogoBtn.Image = "rbxassetid://107831103893115"
+    LogoBtn.Visible = false
+    Instance.new("UICorner", LogoBtn).CornerRadius = UDim.new(0, 10)
+    MakeDraggable(LogoBtn)
+
     local Main = Instance.new("Frame", ScreenGui)
     Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.Size = UDim2.new(0, 0, 0, 0) -- Bắt đầu từ 0 để bung animation
+    Main.Size = UDim2.new(0, 0, 0, 0)
     Main.ClipsDescendants = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
     MakeDraggable(Main)
 
-    -- Hiệu ứng bung menu
     TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
 
     local ModalFrame = Instance.new("TextButton", Main)
     ModalFrame.Size = UDim2.new(0,0,0,0)
     ModalFrame.Modal = true 
 
+    -- 3. THANH TAB (CỐ ĐỊNH CHIỀU CAO)
     local TabBar = Instance.new("Frame", Main)
     TabBar.Size = UDim2.new(1, -20, 0, 35)
     TabBar.Position = UDim2.new(0, 10, 0, 10)
     TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
     Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 6)
 
+    -- LOGO TRONG UI (MỚI THÊM LẠI)
+    local InnerLogo = Instance.new("ImageLabel", TabBar)
+    InnerLogo.Size = UDim2.new(0, 24, 0, 24)
+    InnerLogo.Position = UDim2.new(0, 6, 0.5, -12)
+    InnerLogo.BackgroundTransparency = 1
+    InnerLogo.Image = "rbxassetid://107831103893115"
+
     local TabScroll = Instance.new("ScrollingFrame", TabBar)
-    TabScroll.Size = UDim2.new(1, -40, 1, 0)
-    TabScroll.Position = UDim2.new(0, 10, 0, 0)
-    TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0
+    TabScroll.Size = UDim2.new(1, -70, 1, 0) -- Trừa chỗ cho Logo và nút Close
+    TabScroll.Position = UDim2.new(0, 35, 0, 0)
+    TabScroll.BackgroundTransparency = 1
+    TabScroll.ScrollBarThickness = 0
+    -- KHÓA VUỐT DỌC, CHỈ CHO VUỐT NGANG
+    TabScroll.ScrollingDirection = Enum.ScrollingDirection.X 
     TabScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
+    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+
     local TabList = Instance.new("UIListLayout", TabScroll)
-    TabList.FillDirection = Enum.FillDirection.Horizontal; TabList.VerticalAlignment = Enum.VerticalAlignment.Center; TabList.Padding = UDim.new(0, 5)
+    TabList.FillDirection = Enum.FillDirection.Horizontal
+    TabList.VerticalAlignment = Enum.VerticalAlignment.Center
+    TabList.Padding = UDim.new(0, 5)
+
+    local Close = Instance.new("TextButton", TabBar)
+    Close.Size = UDim2.new(0, 30, 1, 0)
+    Close.Position = UDim2.new(1, -30, 0, 0)
+    Close.Text = "×"; Close.TextColor3 = Color3.fromRGB(255, 80, 80)
+    Close.BackgroundTransparency = 1; Close.Font = Enum.Font.GothamBold; Close.TextSize = 18
 
     local Container = Instance.new("Frame", Main)
     Container.Position = UDim2.new(0, 10, 0, 55)
     Container.Size = UDim2.new(1, -20, 1, -65)
     Container.BackgroundTransparency = 1
+
+    local function ToggleUI()
+        if Main.Visible then
+            local t = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+            t:Play()
+            t.Completed:Connect(function()
+                Main.Visible = false; LogoBtn.Visible = true
+                TweenService:Create(LogoBtn, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 50, 0, 50)}):Play()
+            end)
+        else
+            TweenService:Create(LogoBtn, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+            task.wait(0.2)
+            LogoBtn.Visible = false; Main.Visible = true
+            TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
+        end
+    end
+    Close.MouseButton1Click:Connect(ToggleUI)
+    LogoBtn.MouseButton1Click:Connect(ToggleUI)
 
     local Window = {CurrentTab = nil}
 
@@ -81,10 +129,9 @@ function Library:CreateWindow()
             local Col = Instance.new("ScrollingFrame", Page)
             Col.Size = UDim2.new(0.5, -5, 1, 0); Col.Position = pos
             Col.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-            Col.ScrollBarThickness = 0
+            Col.ScrollBarThickness = 0; Col.AutomaticCanvasSize = Enum.AutomaticSize.Y
+            Col.ScrollingDirection = Enum.ScrollingDirection.Y -- Cột thì chỉ vuốt dọc
             Instance.new("UICorner", Col).CornerRadius = UDim.new(0, 8)
-            Col.AutomaticCanvasSize = Enum.AutomaticSize.Y
-            Col.CanvasSize = UDim2.new(0, 0, 0, 0) 
             
             local L = Instance.new("UIListLayout", Col)
             L.Padding = UDim.new(0, 8); L.HorizontalAlignment = Enum.HorizontalAlignment.Center
@@ -120,7 +167,7 @@ function Library:CreateWindow()
             
             local sTitle = Instance.new("TextLabel", Sec)
             sTitle.Text = "  " .. title:upper(); sTitle.Size = UDim2.new(1, 0, 0, 28); sTitle.TextColor3 = Color3.new(1,1,1)
-            sTitle.Font = Enum.Font.GothamBold; sTitle.TextSize = 12; sTitle.BackgroundTransparency = 1; sTitle.TextXAlignment = 0
+            sTitle.Font = Enum.Font.GothamBold; sTitle.TextSize = 11; sTitle.BackgroundTransparency = 1; sTitle.TextXAlignment = 0
 
             local sCont = Instance.new("Frame", Sec)
             sCont.Position = UDim2.new(0, 10, 0, 32); sCont.Size = UDim2.new(1, -20, 0, 0); sCont.BackgroundTransparency = 1
