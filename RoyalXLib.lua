@@ -3,6 +3,8 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
+print("--- RoyalX Library Loading ---")
+
 local function MakeDraggable(gui)
     local dragging, dragInput, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -22,6 +24,7 @@ local function MakeDraggable(gui)
 end
 
 function Library:CreateWindow()
+    -- Xóa UI cũ nếu có
     if CoreGui:FindFirstChild("RoyalX_Hub") then CoreGui["RoyalX_Hub"]:Destroy() end
 
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
@@ -29,6 +32,7 @@ function Library:CreateWindow()
     ScreenGui.ResetOnSpawn = false
     ScreenGui.IgnoreGuiInset = true
 
+    -- [LOGO MỞ LẠI]
     local LogoBtn = Instance.new("ImageButton", ScreenGui)
     LogoBtn.Size = UDim2.new(0, 50, 0, 50)
     LogoBtn.Position = UDim2.new(0, 50, 0, 150)
@@ -38,28 +42,31 @@ function Library:CreateWindow()
     Instance.new("UICorner", LogoBtn).CornerRadius = UDim.new(0, 10)
     MakeDraggable(LogoBtn)
 
+    -- [KHUNG CHÍNH]
     local Main = Instance.new("Frame", ScreenGui)
     Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.Size = UDim2.new(0, 0, 0, 0)
+    Main.Size = UDim2.new(0, 600, 0, 400) -- Đặt cứng size trước khi tween để tránh lỗi không hiện
     Main.ClipsDescendants = true
+    Main.Visible = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
     MakeDraggable(Main)
 
+    -- Hiệu ứng mở
+    Main.Size = UDim2.new(0, 0, 0, 0)
     TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
 
     local ModalFrame = Instance.new("TextButton", Main)
     ModalFrame.Size = UDim2.new(0,0,0,0); ModalFrame.Modal = true 
 
-    -- [[ THANH TAB BAR - ĐÃ TĂNG LÊN 40 ]]
+    -- [THANH TAB 40PX]
     local TabBar = Instance.new("Frame", Main)
-    TabBar.Size = UDim2.new(1, -20, 0, 40) -- Kích thước 40px
+    TabBar.Size = UDim2.new(1, -20, 0, 40)
     TabBar.Position = UDim2.new(0, 10, 0, 10)
     TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
     Instance.new("UICorner", TabBar).CornerRadius = UDim.new(0, 6)
 
-    -- LOGO TRONG TAB (Cũng to lên cho cân xứng)
     local InnerLogo = Instance.new("ImageLabel", TabBar)
     InnerLogo.Size = UDim2.new(0, 28, 0, 28)
     InnerLogo.Position = UDim2.new(0, 6, 0.5, -14)
@@ -69,8 +76,7 @@ function Library:CreateWindow()
     local TabScroll = Instance.new("ScrollingFrame", TabBar)
     TabScroll.Size = UDim2.new(1, -85, 1, 0)
     TabScroll.Position = UDim2.new(0, 42, 0, 0)
-    TabScroll.BackgroundTransparency = 1
-    TabScroll.ScrollBarThickness = 0
+    TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0
     TabScroll.ScrollingDirection = Enum.ScrollingDirection.X 
     TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
@@ -80,8 +86,7 @@ function Library:CreateWindow()
     TabList.FillDirection = Enum.FillDirection.Horizontal; TabList.VerticalAlignment = Enum.VerticalAlignment.Center; TabList.Padding = UDim.new(0, 6)
 
     local Close = Instance.new("TextButton", TabBar)
-    Close.Size = UDim2.new(0, 35, 1, 0)
-    Close.Position = UDim2.new(1, -35, 0, 0)
+    Close.Size = UDim2.new(0, 35, 1, 0); Close.Position = UDim2.new(1, -35, 0, 0)
     Close.Text = "×"; Close.TextColor3 = Color3.fromRGB(255, 80, 80)
     Close.BackgroundTransparency = 1; Close.Font = Enum.Font.GothamBold; Close.TextSize = 22
 
@@ -89,35 +94,27 @@ function Library:CreateWindow()
         if Main.Visible then
             local t = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
             t:Play()
-            t.Completed:Connect(function()
-                Main.Visible = false; LogoBtn.Visible = true
-                LogoBtn.Size = UDim2.new(0, 0, 0, 0)
-                TweenService:Create(LogoBtn, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 50, 0, 50)}):Play()
-            end)
+            t.Completed:Connect(function() Main.Visible = false; LogoBtn.Visible = true; TweenService:Create(LogoBtn, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 50, 0, 50)}):Play() end)
         else
             TweenService:Create(LogoBtn, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-            task.wait(0.2)
-            LogoBtn.Visible = false; Main.Visible = true
+            task.wait(0.2); LogoBtn.Visible = false; Main.Visible = true
             TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
         end
     end
     Close.MouseButton1Click:Connect(ToggleUI)
     LogoBtn.MouseButton1Click:Connect(ToggleUI)
 
-    -- [[ CONTAINER NỘI DUNG - DỊCH XUỐNG ĐỂ KHÔNG CHẠM TAB 40 ]]
     local Container = Instance.new("Frame", Main)
-    Container.Position = UDim2.new(0, 10, 0, 60) -- Dịch từ 55 xuống 60
-    Container.Size = UDim2.new(1, -20, 1, -70)
-    Container.BackgroundTransparency = 1
+    Container.Position = UDim2.new(0, 10, 0, 60); Container.Size = UDim2.new(1, -20, 1, -70); Container.BackgroundTransparency = 1
 
     local Window = {CurrentTab = nil}
 
     function Window:CreateTab(name)
         local TBtn = Instance.new("TextButton", TabScroll)
-        TBtn.Size = UDim2.new(0, 95, 0, 30) -- Nút tab cũng to lên một chút (30px)
+        TBtn.Size = UDim2.new(0, 95, 0, 30)
         TBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
         TBtn.Text = name; TBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
-        TBtn.Font = Enum.Font.GothamBold; TBtn.TextSize = 12 -- Chữ to lên cho dễ đọc
+        TBtn.Font = Enum.Font.GothamBold; TBtn.TextSize = 12
         Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 4)
 
         local Page = Instance.new("Frame", Container)
@@ -132,9 +129,7 @@ function Library:CreateWindow()
             Instance.new("UICorner", Col).CornerRadius = UDim.new(0, 8)
             local L = Instance.new("UIListLayout", Col); L.Padding = UDim.new(0, 8); L.HorizontalAlignment = Enum.HorizontalAlignment.Center
             Instance.new("UIPadding", Col).PaddingTop = UDim.new(0, 8)
-            L:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                Col.ScrollingEnabled = L.AbsoluteContentSize.Y > Col.AbsoluteSize.Y
-            end)
+            L:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function() Col.ScrollingEnabled = L.AbsoluteContentSize.Y > Col.AbsoluteSize.Y end)
             return Col
         end
 
@@ -142,10 +137,7 @@ function Library:CreateWindow()
         local Right = CreateColumn(UDim2.new(0.5, 5, 0, 0))
 
         TBtn.MouseButton1Click:Connect(function()
-            if Window.CurrentTab then 
-                Window.CurrentTab.P.Visible = false 
-                Window.CurrentTab.B.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-            end
+            if Window.CurrentTab then Window.CurrentTab.P.Visible = false; Window.CurrentTab.B.BackgroundColor3 = Color3.fromRGB(30, 30, 30) end
             Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50); Window.CurrentTab = {P = Page, B = TBtn}
         end)
         if not Window.CurrentTab then Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50); Window.CurrentTab = {P = Page, B = TBtn} end
@@ -154,8 +146,7 @@ function Library:CreateWindow()
         function Tab:CreateSection(title, side)
             local Target = (side == "Right" and Right or Left)
             local Sec = Instance.new("Frame", Target)
-            Sec.Size = UDim2.new(0.94, 0, 0, 40)
-            Sec.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+            Sec.Size = UDim2.new(0.94, 0, 0, 40); Sec.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 6)
             local sTitle = Instance.new("TextLabel", Sec)
             sTitle.Text = "  " .. title:upper(); sTitle.Size = UDim2.new(1, 0, 0, 28); sTitle.TextColor3 = Color3.new(1,1,1)
@@ -195,4 +186,5 @@ function Library:CreateWindow()
     return Window
 end
 
+print("--- RoyalX Library Loaded Successfully ---")
 return Library
