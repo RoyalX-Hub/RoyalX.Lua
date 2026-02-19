@@ -23,24 +23,21 @@ local function MakeDraggable(gui)
 end
 
 function Library:CreateWindow()
-    -- Xóa UI cũ nếu đang chạy
-    if CoreGui:FindFirstChild("RoyalX_Hub") then
-        CoreGui:FindFirstChild("RoyalX_Hub"):Destroy()
-    end
+    if CoreGui:FindFirstChild("RoyalX_Hub") then CoreGui:FindFirstChild("RoyalX_Hub"):Destroy() end
 
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "RoyalX_Hub"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.IgnoreGuiInset = true
 
-    -- 1. NÚT LOGO MỞ MENU
+    -- 1. NÚT LOGO MỞ MENU (CÓ ANIMATION)
     local LogoBtn = Instance.new("ImageButton", ScreenGui)
     LogoBtn.Name = "LogoBtn"
-    LogoBtn.Size = UDim2.new(0, 50, 0, 50)
-    LogoBtn.Position = UDim2.new(0, 100, 0, 100)
+    LogoBtn.Size = UDim2.new(0, 0, 0, 0) -- Mặc định ẩn
+    LogoBtn.Position = UDim2.new(0, 50, 0, 150)
     LogoBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     LogoBtn.Image = "rbxassetid://107831103893115"
-    LogoBtn.Visible = false -- Chỉ hiện khi đóng menu
+    LogoBtn.Visible = false
     LogoBtn.ZIndex = 10
     Instance.new("UICorner", LogoBtn).CornerRadius = UDim.new(0, 10)
     MakeDraggable(LogoBtn)
@@ -49,12 +46,15 @@ function Library:CreateWindow()
     local Main = Instance.new("Frame", ScreenGui)
     Main.Name = "Main"
     Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-    Main.Position = UDim2.new(0.5, -325, 0.5, -225)
-    Main.Size = UDim2.new(0, 650, 0, 450)
+    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+    Main.AnchorPoint = Vector2.new(0.5, 0.5)
+    Main.Size = UDim2.new(0, 0, 0, 0) -- Bắt đầu từ 0 để bung ra
     Main.ClipsDescendants = true
-    Main.Visible = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
     MakeDraggable(Main)
+
+    -- Animation Bung Menu khi vừa load
+    TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 650, 0, 450)}):Play()
 
     -- 3. THANH TAB
     local TabBar = Instance.new("Frame", Main)
@@ -93,14 +93,26 @@ function Library:CreateWindow()
     Container.Size = UDim2.new(1, -20, 1, -75)
     Container.BackgroundTransparency = 1
 
-    -- Logic Đóng/Mở
+    -- Logic Đóng/Mở Mượt Mà
     local function ToggleUI()
         if Main.Visible then
-            Main.Visible = false
-            LogoBtn.Visible = true
+            -- Thu nhỏ Main
+            local t = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+            t:Play()
+            t.Completed:Connect(function()
+                Main.Visible = false
+                LogoBtn.Visible = true
+                TweenService:Create(LogoBtn, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 50, 0, 50)}):Play()
+            end)
         else
-            LogoBtn.Visible = false
-            Main.Visible = true
+            -- Thu nhỏ Logo rồi hiện Main
+            local t = TweenService:Create(LogoBtn, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(0, 0, 0, 0)})
+            t:Play()
+            t.Completed:Connect(function()
+                LogoBtn.Visible = false
+                Main.Visible = true
+                TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 650, 0, 450)}):Play()
+            end)
         end
     end
     Close.MouseButton1Click:Connect(ToggleUI)
@@ -197,8 +209,9 @@ function Library:CreateWindow()
 
                 Tgl.MouseButton1Click:Connect(function()
                     state = not state
+                    -- Animation cho nút Toggle
                     Check.Visible = state
-                    Box.BackgroundColor3 = state and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(60, 60, 60)
+                    TweenService:Create(Box, TweenInfo.new(0.2), {BackgroundColor3 = state and Color3.fromRGB(0, 255, 255) or Color3.fromRGB(60, 60, 60)}):Play()
                     cb(state)
                 end)
             end
