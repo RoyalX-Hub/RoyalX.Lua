@@ -3,8 +3,6 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
-print("--- RoyalX Library Loading ---")
-
 local function MakeDraggable(gui)
     local dragging, dragInput, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -24,43 +22,42 @@ local function MakeDraggable(gui)
 end
 
 function Library:CreateWindow()
-    -- Xóa UI cũ nếu có
     if CoreGui:FindFirstChild("RoyalX_Hub") then CoreGui["RoyalX_Hub"]:Destroy() end
 
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "RoyalX_Hub"
-    ScreenGui.ResetOnSpawn = false
-    ScreenGui.IgnoreGuiInset = true
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- [LOGO MỞ LẠI]
+    -- [LOGO MỞ LẠI MENU - Hiện khi Menu đóng]
     local LogoBtn = Instance.new("ImageButton", ScreenGui)
-    LogoBtn.Size = UDim2.new(0, 50, 0, 50)
+    LogoBtn.Name = "OpenLogo"
+    LogoBtn.Size = UDim2.new(0, 0, 0, 0) -- Bắt đầu bằng 0
     LogoBtn.Position = UDim2.new(0, 50, 0, 150)
     LogoBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     LogoBtn.Image = "rbxassetid://107831103893115"
     LogoBtn.Visible = false
+    LogoBtn.ClipsDescendants = true
     Instance.new("UICorner", LogoBtn).CornerRadius = UDim.new(0, 10)
     MakeDraggable(LogoBtn)
 
-    -- [KHUNG CHÍNH]
+    -- [KHUNG CHÍNH MAIN]
     local Main = Instance.new("Frame", ScreenGui)
+    Main.Name = "MainFrame"
     Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.Size = UDim2.new(0, 600, 0, 400) -- Đặt cứng size trước khi tween để tránh lỗi không hiện
+    Main.Size = UDim2.new(0, 0, 0, 0) -- Bắt đầu bằng 0 để bung ra
     Main.ClipsDescendants = true
-    Main.Visible = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
     MakeDraggable(Main)
 
-    -- Hiệu ứng mở
-    Main.Size = UDim2.new(0, 0, 0, 0)
-    TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
+    -- Hiệu ứng bung Menu khi vừa chạy script
+    TweenService:Create(Main, TweenInfo.new(0.6, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
 
     local ModalFrame = Instance.new("TextButton", Main)
     ModalFrame.Size = UDim2.new(0,0,0,0); ModalFrame.Modal = true 
 
-    -- [THANH TAB 40PX]
+    -- [THANH TAB BAR 40PX]
     local TabBar = Instance.new("Frame", Main)
     TabBar.Size = UDim2.new(1, -20, 0, 40)
     TabBar.Position = UDim2.new(0, 10, 0, 10)
@@ -73,6 +70,44 @@ function Library:CreateWindow()
     InnerLogo.BackgroundTransparency = 1
     InnerLogo.Image = "rbxassetid://107831103893115"
 
+    local Close = Instance.new("TextButton", TabBar)
+    Close.Size = UDim2.new(0, 35, 1, 0)
+    Close.Position = UDim2.new(1, -35, 0, 0)
+    Close.Text = "×"; Close.TextColor3 = Color3.fromRGB(255, 80, 80)
+    Close.BackgroundTransparency = 1; Close.Font = Enum.Font.GothamBold; Close.TextSize = 22
+
+    -- [LOGIC TẮT/BẬT MENU VỚI ANIMATION]
+    local isMenuOpen = true
+    local function ToggleMenu()
+        if isMenuOpen then
+            isMenuOpen = false
+            -- Thu nhỏ Menu
+            local closeTween = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+            closeTween:Play()
+            closeTween.Completed:Connect(function()
+                Main.Visible = false
+                LogoBtn.Visible = true
+                -- Bung nút Logo nhỏ
+                TweenService:Create(LogoBtn, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 50, 0, 50)}):Play()
+            end)
+        else
+            isMenuOpen = true
+            -- Thu nhỏ nút Logo
+            local hideLogo = TweenService:Create(LogoBtn, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+            hideLogo:Play()
+            hideLogo.Completed:Connect(function()
+                LogoBtn.Visible = false
+                Main.Visible = true
+                -- Bung lại Menu chính
+                TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
+            end)
+        end
+    end
+
+    Close.MouseButton1Click:Connect(ToggleMenu)
+    LogoBtn.MouseButton1Click:Connect(ToggleMenu)
+
+    -- [THANH CUỘN TAB CHỈ VUỐT NGANG]
     local TabScroll = Instance.new("ScrollingFrame", TabBar)
     TabScroll.Size = UDim2.new(1, -85, 1, 0)
     TabScroll.Position = UDim2.new(0, 42, 0, 0)
@@ -84,25 +119,6 @@ function Library:CreateWindow()
 
     local TabList = Instance.new("UIListLayout", TabScroll)
     TabList.FillDirection = Enum.FillDirection.Horizontal; TabList.VerticalAlignment = Enum.VerticalAlignment.Center; TabList.Padding = UDim.new(0, 6)
-
-    local Close = Instance.new("TextButton", TabBar)
-    Close.Size = UDim2.new(0, 35, 1, 0); Close.Position = UDim2.new(1, -35, 0, 0)
-    Close.Text = "×"; Close.TextColor3 = Color3.fromRGB(255, 80, 80)
-    Close.BackgroundTransparency = 1; Close.Font = Enum.Font.GothamBold; Close.TextSize = 22
-
-    local function ToggleUI()
-        if Main.Visible then
-            local t = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
-            t:Play()
-            t.Completed:Connect(function() Main.Visible = false; LogoBtn.Visible = true; TweenService:Create(LogoBtn, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 50, 0, 50)}):Play() end)
-        else
-            TweenService:Create(LogoBtn, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-            task.wait(0.2); LogoBtn.Visible = false; Main.Visible = true
-            TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Size = UDim2.new(0, 600, 0, 400)}):Play()
-        end
-    end
-    Close.MouseButton1Click:Connect(ToggleUI)
-    LogoBtn.MouseButton1Click:Connect(ToggleUI)
 
     local Container = Instance.new("Frame", Main)
     Container.Position = UDim2.new(0, 10, 0, 60); Container.Size = UDim2.new(1, -20, 1, -70); Container.BackgroundTransparency = 1
@@ -137,20 +153,31 @@ function Library:CreateWindow()
         local Right = CreateColumn(UDim2.new(0.5, 5, 0, 0))
 
         TBtn.MouseButton1Click:Connect(function()
-            if Window.CurrentTab then Window.CurrentTab.P.Visible = false; Window.CurrentTab.B.BackgroundColor3 = Color3.fromRGB(30, 30, 30) end
-            Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50); Window.CurrentTab = {P = Page, B = TBtn}
+            if Window.CurrentTab then 
+                Window.CurrentTab.P.Visible = false 
+                Window.CurrentTab.B.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            end
+            Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            Window.CurrentTab = {P = Page, B = TBtn}
         end)
-        if not Window.CurrentTab then Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50); Window.CurrentTab = {P = Page, B = TBtn} end
+        
+        if not Window.CurrentTab then 
+            Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            Window.CurrentTab = {P = Page, B = TBtn} 
+        end
 
         local Tab = {}
         function Tab:CreateSection(title, side)
             local Target = (side == "Right" and Right or Left)
             local Sec = Instance.new("Frame", Target)
-            Sec.Size = UDim2.new(0.94, 0, 0, 40); Sec.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
+            Sec.Size = UDim2.new(0.94, 0, 0, 40)
+            Sec.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
             Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 6)
+            
             local sTitle = Instance.new("TextLabel", Sec)
             sTitle.Text = "  " .. title:upper(); sTitle.Size = UDim2.new(1, 0, 0, 28); sTitle.TextColor3 = Color3.new(1,1,1)
             sTitle.Font = Enum.Font.GothamBold; sTitle.TextSize = 11; sTitle.BackgroundTransparency = 1; sTitle.TextXAlignment = 0
+            
             local sCont = Instance.new("Frame", Sec)
             sCont.Position = UDim2.new(0, 10, 0, 32); sCont.Size = UDim2.new(1, -20, 0, 0); sCont.BackgroundTransparency = 1
             local L = Instance.new("UIListLayout", sCont); L.Padding = UDim.new(0, 6)
@@ -186,5 +213,4 @@ function Library:CreateWindow()
     return Window
 end
 
-print("--- RoyalX Library Loaded Successfully ---")
 return Library
