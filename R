@@ -28,31 +28,18 @@ function Library:CreateWindow(cfg)
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "RoyalX_Hub"; ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- [ LOGO MỞ ]
-    local LogoOpenBtn = Instance.new("ImageButton", ScreenGui)
-    LogoOpenBtn.Size = UDim2.new(0, 55, 0, 55); LogoOpenBtn.Position = UDim2.new(0, 50, 0, 150); LogoOpenBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); LogoOpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115"); LogoOpenBtn.Visible = false 
-    Instance.new("UICorner", LogoOpenBtn).CornerRadius = UDim.new(0, 12); MakeDraggable(LogoOpenBtn)
-
-    -- [ KHUNG CHÍNH ]
     local Main = Instance.new("Frame", ScreenGui)
     Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12); Main.Position = UDim2.new(0.5, 0, 0.5, 0); Main.AnchorPoint = Vector2.new(0.5, 0.5); Main.Size = UDim2.new(0, 580, 0, 380); Main.ClipsDescendants = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10); MakeDraggable(Main)
 
-    -- [ THANH TAB ]
+    -- [ TAB BAR ]
     local TabBar = Instance.new("Frame", Main)
     TabBar.Size = UDim2.new(1, -115, 0, 35); TabBar.Position = UDim2.new(0, 65, 0, 13); TabBar.BackgroundColor3 = Color3.fromRGB(20, 20, 20); Instance.new("UICorner", TabBar)
 
     local TabScroll = Instance.new("ScrollingFrame", TabBar)
-    TabScroll.Size = UDim2.new(1, -45, 1, 0); TabScroll.Position = UDim2.new(0, 5, 0, 0); TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0; TabScroll.AutomaticCanvasSize = "X"
+    TabScroll.Size = UDim2.new(1, -10, 1, 0); TabScroll.Position = UDim2.new(0, 5, 0, 0); TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0; TabScroll.CanvasSize = UDim2.new(0,0,0,0); TabScroll.AutomaticCanvasSize = "X"; TabScroll.ElasticBehavior = "Never"
     local TabList = Instance.new("UIListLayout", TabScroll); TabList.FillDirection = "Horizontal"; TabList.Padding = UDim.new(0, 6); TabList.VerticalAlignment = "Center"
 
-    local CloseBtn = Instance.new("TextButton", TabBar)
-    CloseBtn.Size = UDim2.new(0, 35, 1, 0); CloseBtn.Position = UDim2.new(1, -35, 0, 0); CloseBtn.Text = "×"; CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255); CloseBtn.BackgroundTransparency = 1; CloseBtn.TextSize = 22; CloseBtn.Font = "GothamBold"
-
-    CloseBtn.MouseButton1Click:Connect(function() Main.Visible = false; LogoOpenBtn.Visible = true end)
-    LogoOpenBtn.MouseButton1Click:Connect(function() Main.Visible = true; LogoOpenBtn.Visible = false end)
-
-    -- [ CONTAINER GIỚI HẠN VUỐT ]
     local Container = Instance.new("Frame", Main)
     Container.Position = UDim2.new(0, 10, 0, 65); Container.Size = UDim2.new(1, -20, 1, -75); Container.BackgroundTransparency = 1; Container.ClipsDescendants = true
 
@@ -67,25 +54,26 @@ function Library:CreateWindow(cfg)
 
         local function CreateCol(pos)
             local SF = Instance.new("ScrollingFrame", Page)
-            SF.Size = UDim2.new(0.5, -7, 1, 0); SF.Position = pos; SF.BackgroundTransparency = 1; SF.ScrollBarThickness = 2; SF.ScrollBarImageColor3 = Color3.fromRGB(40,40,40); SF.AutomaticCanvasSize = "Y"
+            SF.Size = UDim2.new(0.5, -7, 1, 0); SF.Position = pos; SF.BackgroundTransparency = 1; SF.ScrollBarThickness = 0; SF.AutomaticCanvasSize = "Y"; SF.ElasticBehavior = "Never"
             Instance.new("UIListLayout", SF).Padding = UDim.new(0, 12)
             return SF
         end
         local Left = CreateCol(UDim2.new(0,0,0,0)); local Right = CreateCol(UDim2.new(0.5,7,0,0))
 
-        -- [ ANIMATION CHUYỂN TAB ]
+        -- [ ANIMATION CHUYỂN TAB XỊN ]
         TBtn.MouseButton1Click:Connect(function()
             if Window.CurrentTab and Window.CurrentTab.B ~= TBtn then
                 local OldPage = Window.CurrentTab.P
-                TweenService:Create(OldPage, TweenInfo.new(0.2), {GroupTransparency = 1}):Play()
-                task.wait(0.2)
+                TweenService:Create(OldPage, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {GroupTransparency = 1}):Play()
+                TweenService:Create(Window.CurrentTab.B, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(30, 30, 30), TextSize = 11}):Play()
+                task.wait(0.1)
                 OldPage.Visible = false
-                TweenService:Create(Window.CurrentTab.B, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
             end
             Page.Visible = true
-            Page.Position = UDim2.new(0, 0, 0, 10) -- Bắt đầu hơi lệch xuống
-            TweenService:Create(Page, TweenInfo.new(0.4, Enum.EasingStyle.Quart), {GroupTransparency = 0, Position = UDim2.new(0,0,0,0)}):Play()
-            TweenService:Create(TBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(0, 170, 255)}):Play()
+            Page.Position = UDim2.new(0, 0, 0, 20) -- Slide up effect
+            -- Tween Zoom & Fade & Slide
+            TweenService:Create(Page, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {GroupTransparency = 0, Position = UDim2.new(0,0,0,0)}):Play()
+            TweenService:Create(TBtn, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {BackgroundColor3 = Color3.fromRGB(0, 170, 255), TextSize = 12}):Play()
             Window.CurrentTab = {P = Page, B = TBtn}
         end)
 
@@ -131,20 +119,19 @@ function Library:CreateWindow(cfg)
                 Drop.Size = UDim2.new(1, -16, 0, 32); Drop.BackgroundColor3 = Color3.fromRGB(25, 25, 25); Drop.ClipsDescendants = true; Instance.new("UICorner", Drop)
                 local Btn = Instance.new("TextButton", Drop); Btn.Size = UDim2.new(1, 0, 0, 32); Btn.BackgroundTransparency = 1; Btn.Text = "   "..text; Btn.TextColor3 = Color3.fromRGB(255, 255, 255); Btn.TextXAlignment = 0; Btn.Font = "Gotham"; Btn.TextSize = 11
                 
-                -- [ GIỚI HẠN VUỐT TRONG DROPDOWN ]
                 local SFrame = Instance.new("ScrollingFrame", Drop)
-                SFrame.Position = UDim2.new(0, 0, 0, 32); SFrame.Size = UDim2.new(1, 0, 0, 100); SFrame.BackgroundTransparency = 1; SFrame.ScrollBarThickness = 2; SFrame.CanvasSize = UDim2.new(0,0,0,0); SFrame.AutomaticCanvasSize = "Y"
+                SFrame.Position = UDim2.new(0, 0, 0, 32); SFrame.Size = UDim2.new(1, 0, 0, 100); SFrame.BackgroundTransparency = 1; SFrame.ScrollBarThickness = 0; SFrame.CanvasSize = UDim2.new(0,0,0,0); SFrame.AutomaticCanvasSize = "Y"; SFrame.ElasticBehavior = "Never"
                 Instance.new("UIListLayout", SFrame).Padding = UDim.new(0, 2)
                 
                 local isOpened = false
                 Btn.MouseButton1Click:Connect(function()
-                    isOpened = not isOpened; TweenService:Create(Drop, TweenInfo.new(0.3), {Size = isOpened and UDim2.new(1, -16, 0, 135) or UDim2.new(1, -16, 0, 32)}):Play()
+                    isOpened = not isOpened; TweenService:Create(Drop, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = isOpened and UDim2.new(1, -16, 0, 135) or UDim2.new(1, -16, 0, 32)}):Play()
                 end)
                 for _, v in pairs(list) do
                     local Item = Instance.new("TextButton", SFrame)
                     Item.Size = UDim2.new(1, 0, 0, 25); Item.BackgroundColor3 = Color3.fromRGB(30, 30, 30); Item.BorderSizePixel = 0; Item.Text = v; Item.TextColor3 = Color3.fromRGB(200, 200, 200); Item.Font = "Gotham"; Item.TextSize = 10
                     Item.MouseButton1Click:Connect(function()
-                        Btn.Text = "   "..text.." :  "..v; isOpened = false; TweenService:Create(Drop, TweenInfo.new(0.3), {Size = UDim2.new(1, -16, 0, 32)}):Play(); cb(v)
+                        Btn.Text = "   "..text.." :  "..v; isOpened = false; TweenService:Create(Drop, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(1, -16, 0, 32)}):Play(); cb(v)
                     end)
                 end
             end
