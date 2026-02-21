@@ -4,7 +4,7 @@ local UserInputService = game:GetService("UserInputService")
 
 local Library = {}
 
--- Hàm hỗ trợ kéo di chuyển (Draggable)
+-- Hàm Draggable chuẩn cho Mobile và PC
 local function MakeDraggable(gui)
     local dragging, dragInput, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -33,20 +33,20 @@ end
 function Library:CreateWindow(Config)
     local LogoID = "rbxassetid://" .. (Config.Logo or "107831103893115")
     
-    if CoreGui:FindFirstChild("RoyalX_Final") then CoreGui:FindFirstChild("RoyalX_Final"):Destroy() end
+    if CoreGui:FindFirstChild("RoyalX_Final_Fixed") then CoreGui:FindFirstChild("RoyalX_Final_Fixed"):Destroy() end
 
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "RoyalX_Final"
+    ScreenGui.Name = "RoyalX_Final_Fixed"
     ScreenGui.Parent = CoreGui
 
     local CanvasGroup = Instance.new("CanvasGroup")
     CanvasGroup.Parent = ScreenGui
     CanvasGroup.Size = UDim2.new(1, 0, 1, 0)
     CanvasGroup.BackgroundTransparency = 1
-    CanvasGroup.GroupTransparency = 0 -- BẬT SẴN MENU
+    CanvasGroup.GroupTransparency = 0 
     CanvasGroup.Visible = true
 
-    -- NÚT MỞ (DRAGGABLE & KHÔNG VIỀN)
+    -- Nút Mở (Không viền, Draggable)
     local OpenBtn = Instance.new("ImageButton")
     OpenBtn.Parent = ScreenGui
     OpenBtn.Size = UDim2.new(0, 55, 0, 55)
@@ -54,28 +54,29 @@ function Library:CreateWindow(Config)
     OpenBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     OpenBtn.BorderSizePixel = 0
     OpenBtn.Image = LogoID
-    OpenBtn.Visible = false -- ẨN KHI MỚI VÀO (VÌ MENU ĐANG MỞ)
+    OpenBtn.Visible = false 
     Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 12)
-    
-    MakeDraggable(OpenBtn) -- Cho phép kéo nút
+    MakeDraggable(OpenBtn)
 
-    -- KHUNG MAIN
+    -- Khung Menu Chính
     local Main = Instance.new("Frame")
     Main.Parent = CanvasGroup
-    Main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    Main.BackgroundColor3 = Color3.fromRGB(25, 25, 25) -- Đen nhạt
     Main.Position = UDim2.new(0.5, -300, 0.5, -185)
     Main.Size = UDim2.new(0, 600, 0, 370)
+    Main.BorderSizePixel = 0
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
-    
-    -- Cho phép kéo cả Menu chính
     MakeDraggable(Main)
 
+    -- TopBar (Đen đậm)
     local TopBar = Instance.new("Frame")
     TopBar.Parent = Main
     TopBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     TopBar.Size = UDim2.new(1, 0, 0, 55)
+    TopBar.BorderSizePixel = 0
     Instance.new("UICorner", TopBar).CornerRadius = UDim.new(0, 10)
 
+    -- Logo Toggle
     local LogoToggle = Instance.new("ImageButton")
     LogoToggle.Parent = TopBar
     LogoToggle.Position = UDim2.new(0, 12, 0.5, -20)
@@ -101,20 +102,27 @@ function Library:CreateWindow(Config)
     OpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
     LogoToggle.MouseButton1Click:Connect(function() ToggleUI(false) end)
 
-    local TabContainer = Instance.new("ScrollingFrame")
-    TabContainer.Parent = TopBar
-    TabContainer.Position = UDim2.new(0, 65, 0, 0)
-    TabContainer.Size = UDim2.new(1, -75, 1, 0)
-    TabContainer.BackgroundTransparency = 1
-    TabContainer.ScrollBarThickness = 0
-    Instance.new("UIListLayout", TabContainer).FillDirection = Enum.FillDirection.Horizontal
-    Instance.new("UIListLayout", TabContainer).Padding = UDim.new(0, 8)
-    Instance.new("UIListLayout", TabContainer).VerticalAlignment = Enum.VerticalAlignment.Center
+    -- Thanh Tab (Chỉ vuốt ngang khi cần)
+    local TabScroll = Instance.new("ScrollingFrame")
+    TabScroll.Parent = TopBar
+    TabScroll.Position = UDim2.new(0, 65, 0, 0)
+    TabScroll.Size = UDim2.new(1, -75, 1, 0)
+    TabScroll.BackgroundTransparency = 1
+    TabScroll.BorderSizePixel = 0
+    TabScroll.ScrollBarThickness = 0
+    TabScroll.ScrollingDirection = Enum.ScrollingDirection.X -- Chỉ vuốt trái phải
+    TabScroll.AutomaticCanvasSize = Enum.AutomaticCanvasSize.X -- Tự động bật vuốt khi tab nhiều
+
+    local TL = Instance.new("UIListLayout", TabScroll)
+    TL.FillDirection = Enum.FillDirection.Horizontal
+    TL.Padding = UDim.new(0, 8)
+    TL.VerticalAlignment = Enum.VerticalAlignment.Center
 
     function Library:CreateTab(Name)
-        local TabBtn = Instance.new("TextButton", TabContainer)
+        local TabBtn = Instance.new("TextButton", TabScroll)
         TabBtn.Size = UDim2.new(0, 95, 0, 32)
-        TabBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        TabBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25) -- Đổi sang Đen Nhạt (giống Main)
+        TabBtn.BorderSizePixel = 0
         TabBtn.Text = Name
         TabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
         TabBtn.Font = Enum.Font.GothamBold
@@ -126,16 +134,21 @@ function Library:CreateWindow(Config)
         TabPage.BackgroundTransparency = 1
         TabPage.Visible = false
 
+        -- Cột chức năng (Chỉ vuốt khi đầy)
         local function CreateCol(pos)
             local Col = Instance.new("ScrollingFrame", TabPage)
             Col.Size = UDim2.new(0.5, -15, 1, -15)
             Col.Position = pos
-            Col.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-            Col.ScrollBarThickness = 2
-            Col.CanvasSize = UDim2.new(0, 0, 2, 0)
+            Col.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- Cột đen đậm
+            Col.BorderSizePixel = 0
+            Col.ScrollBarThickness = 0 -- Ẩn thanh cuộn cho sạch
+            Col.ScrollingDirection = Enum.ScrollingDirection.Y -- Chỉ vuốt lên xuống
+            Col.AutomaticCanvasSize = Enum.AutomaticCanvasSize.Y -- Chỉ cho vuốt khi nội dung dài
             Instance.new("UICorner", Col).CornerRadius = UDim.new(0, 8)
-            Instance.new("UIListLayout", Col).Padding = UDim.new(0, 10)
-            Instance.new("UIListLayout", Col).HorizontalAlignment = Enum.HorizontalAlignment.Center
+            
+            local L = Instance.new("UIListLayout", Col)
+            L.Padding = UDim.new(0, 10)
+            L.HorizontalAlignment = Enum.HorizontalAlignment.Center
             Instance.new("UIPadding", Col).PaddingTop = UDim.new(0, 10)
             return Col
         end
@@ -145,13 +158,39 @@ function Library:CreateWindow(Config)
 
         TabBtn.MouseButton1Click:Connect(function()
             for _, v in pairs(Main:GetChildren()) do if v:IsA("Frame") and v ~= TopBar then v.Visible = false end end
+            for _, v in pairs(TabScroll:GetChildren()) do if v:IsA("TextButton") then v.BackgroundColor3 = Color3.fromRGB(25, 25, 25) end end
             TabPage.Visible = true
+            TabBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50) -- Màu khi nhấn
         end)
 
-        return {} -- Có thể thêm AddToggle/AddDropdown ở đây
+        local Elements = {}
+        -- Hàm AddToggle mẫu
+        function Elements:AddToggle(Text, Side, Callback)
+            local P = (Side == "Right" and RightCol or LeftCol)
+            local TBtn = Instance.new("TextButton", P)
+            TBtn.Size = UDim2.new(1, -20, 0, 40)
+            TBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            TBtn.BorderSizePixel = 0
+            TBtn.Text = "  " .. Text
+            TBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+            TBtn.TextXAlignment = Enum.TextXAlignment.Left
+            Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 8)
+            
+            local Circle = Instance.new("Frame", TBtn)
+            Circle.Size = UDim2.new(0, 22, 0, 22)
+            Circle.Position = UDim2.new(1, -32, 0.5, -11)
+            Circle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
+            
+            local s = false
+            TBtn.MouseButton1Click:Connect(function()
+                s = not s
+                TweenService:Create(Circle, TweenInfo.new(0.2), {BackgroundColor3 = s and Color3.fromRGB(0, 180, 255) or Color3.fromRGB(60, 60, 60)}):Play()
+                Callback(s)
+            end)
+        end
+        return Elements
     end
-
     return Library
 end
-
 return Library
