@@ -8,6 +8,9 @@ local function MakeDraggable(gui)
     gui.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true; dragStart = input.Position; startPos = gui.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
         end
     end)
     UserInputService.InputChanged:Connect(function(input)
@@ -15,9 +18,6 @@ local function MakeDraggable(gui)
             local delta = input.Position - dragStart
             gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
-    end)
-    gui.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
     end)
 end
 
@@ -27,198 +27,99 @@ function Library:CreateWindow(cfg)
 
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "RoyalX_Hub"
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
-    -- Nút Logo mở lại Menu khi đóng
-    local LogoOpenBtn = Instance.new("ImageButton", ScreenGui)
-    LogoOpenBtn.Size = UDim2.new(0, 50, 0, 50)
-    LogoOpenBtn.Position = UDim2.new(0, 50, 0, 150)
-    LogoOpenBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    LogoOpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
-    LogoOpenBtn.Visible = false 
-    Instance.new("UICorner", LogoOpenBtn).CornerRadius = UDim.new(0, 12)
-    MakeDraggable(LogoOpenBtn)
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
     local Main = Instance.new("Frame", ScreenGui)
-    Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-    Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.Size = UDim2.new(0, 580, 0, 380)
-    Main.ClipsDescendants = true
-    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
-    MakeDraggable(Main)
+    Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+    Main.AnchorPoint = Vector2.new(0.5, 0.5); Main.Size = UDim2.new(0, 580, 0, 400) -- Tăng chiều cao một chút
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10); MakeDraggable(Main)
 
-    -- Logo bên trong UI
-    local InnerLogo = Instance.new("ImageLabel", Main)
-    InnerLogo.Size = UDim2.new(0, 40, 0, 40)
-    InnerLogo.Position = UDim2.new(0, 12, 0, 10)
-    InnerLogo.BackgroundTransparency = 1
-    InnerLogo.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
-    Instance.new("UICorner", InnerLogo).CornerRadius = UDim.new(0, 8)
+    -- [ LOGO GÓC TRÁI ]
+    local LogoImg = Instance.new("ImageLabel", Main)
+    LogoImg.Size = UDim2.new(0, 40, 0, 40); LogoImg.Position = UDim2.new(0, 15, 0, 10)
+    LogoImg.BackgroundTransparency = 1; LogoImg.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
+    LogoImg.ZIndex = 10
 
-    -- Thanh Tab Bar
+    -- [ THANH TAB - CĂN GIỮA TUYỆT ĐỐI ]
     local TabBar = Instance.new("Frame", Main)
-    TabBar.Size = UDim2.new(1, -75, 0, 40)
-    TabBar.Position = UDim2.new(0, 65, 0, 10)
-    TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
-    Instance.new("UICorner", TabBar)
+    TabBar.Size = UDim2.new(1, -120, 0, 40); TabBar.Position = UDim2.new(0, 70, 0, 10)
+    TabBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25); Instance.new("UICorner", TabBar)
 
-    local TabScroll = Instance.new("ScrollingFrame", TabBar)
-    TabScroll.Size = UDim2.new(1, -50, 1, 0)
-    TabScroll.Position = UDim2.new(0, 10, 0, 0)
-    TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0
-    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0); TabScroll.AutomaticCanvasSize = "X"
-    local TabListLY = Instance.new("UIListLayout", TabScroll)
-    TabListLY.FillDirection = "Horizontal"; TabListLY.Padding = UDim.new(0, 8); TabListLY.VerticalAlignment = "Center"
+    local TabList = Instance.new("Frame", TabBar)
+    TabList.Size = UDim2.new(1, 0, 1, 0); TabList.BackgroundTransparency = 1
+    local TabLY = Instance.new("UIListLayout", TabList)
+    TabLY.FillDirection = "Horizontal"; TabLY.Padding = UDim.new(0, 15); TabLY.HorizontalAlignment = "Center"; TabLY.VerticalAlignment = "Center"
 
-    -- Nút X (Đóng Menu)
-    local CloseBtn = Instance.new("TextButton", TabBar)
-    CloseBtn.Size = UDim2.new(0, 35, 1, 0)
-    CloseBtn.Position = UDim2.new(1, -35, 0, 0)
-    CloseBtn.Text = "×"
-    CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
-    CloseBtn.BackgroundTransparency = 1; CloseBtn.TextSize = 24; CloseBtn.Font = "GothamBold"
-
-    CloseBtn.MouseButton1Click:Connect(function()
-        Main.Visible = false
-        LogoOpenBtn.Visible = true
-    end)
-    LogoOpenBtn.MouseButton1Click:Connect(function()
-        Main.Visible = true
-        LogoOpenBtn.Visible = false
-    end)
-
+    -- [ NÚT ĐÓNG ]
+    local Close = Instance.new("TextButton", Main)
+    Close.Size = UDim2.new(0, 30, 0, 30); Close.Position = UDim2.new(1, -40, 0, 15)
+    Close.Text = "×"; Close.TextColor3 = Color3.fromRGB(255, 80, 80); Close.BackgroundTransparency = 1; Close.TextSize = 30; Close.Font = "GothamBold"
+    
     local Container = Instance.new("Frame", Main)
-    Container.Position = UDim2.new(0, 10, 0, 65)
-    Container.Size = UDim2.new(1, -20, 1, -75)
-    Container.BackgroundTransparency = 1
+    Container.Position = UDim2.new(0, 15, 0, 65); Container.Size = UDim2.new(1, -30, 1, -80); Container.BackgroundTransparency = 1
 
-    local Window = { Tabs = {} }
+    local Window = { Tabs = {}, Pages = {} }
 
     function Window:CreateTab(name)
-        local TBtn = Instance.new("TextButton", TabScroll)
-        TBtn.Size = UDim2.new(0, 100, 0, 30); TBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        TBtn.Text = name; TBtn.TextColor3 = Color3.fromRGB(180, 180, 180); TBtn.Font = "GothamBold"; TBtn.TextSize = 12
-        Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 6)
+        local TBtn = Instance.new("TextButton", TabList)
+        TBtn.Size = UDim2.new(0, 80, 0, 28); TBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35); TBtn.Text = name
+        TBtn.TextColor3 = Color3.fromRGB(150, 150, 150); TBtn.Font = "GothamBold"; TBtn.TextSize = 12; Instance.new("UICorner", TBtn)
 
-        local Page = Instance.new("Frame", Container)
-        Page.Size = UDim2.new(1, 0, 1, 0); Page.Visible = false; Page.BackgroundTransparency = 1
+        local Page = Instance.new("Frame", Container); Page.Size = UDim2.new(1, 0, 1, 0); Page.Visible = false; Page.BackgroundTransparency = 1
+        table.insert(Window.Tabs, TBtn); table.insert(Window.Pages, Page)
 
+        -- [ CỘT NỘI DUNG ]
         local function CreateCol(pos)
             local SF = Instance.new("ScrollingFrame", Page)
-            SF.Size = UDim2.new(0.5, -7, 1, 0); SF.Position = pos; SF.BackgroundTransparency = 1; SF.ScrollBarThickness = 0
-            SF.CanvasSize = UDim2.new(0, 0, 0, 0); SF.AutomaticCanvasSize = "Y"
-            local LY = Instance.new("UIListLayout", SF); LY.Padding = UDim.new(0, 15); LY.SortOrder = Enum.SortOrder.LayoutOrder
+            SF.Size = UDim2.new(0.5, -8, 1, 0); SF.Position = pos; SF.BackgroundTransparency = 1; SF.ScrollBarThickness = 0
+            local LY = Instance.new("UIListLayout", SF); LY.Padding = UDim.new(0, 12); LY.SortOrder = "LayoutOrder"
+            
+            -- FIX CĂN BẢN: Ép CanvasSize nở ra khi có Section
+            LY:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                SF.CanvasSize = UDim2.new(0, 0, 0, LY.AbsoluteContentSize.Y + 20)
+            end)
             return SF
         end
-        local Left = CreateCol(UDim2.new(0,0,0,0))
-        local Right = CreateCol(UDim2.new(0.5,7,0,0))
+        local Left = CreateCol(UDim2.new(0,0,0,0)); local Right = CreateCol(UDim2.new(0.5,8,0,0))
 
         TBtn.MouseButton1Click:Connect(function()
-            for _, t in pairs(Window.Tabs) do
-                t.P.Visible = false
-                t.B.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-                t.B.TextColor3 = Color3.fromRGB(180, 180, 180)
-            end
-            Page.Visible = true
-            TBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-            TBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            for i, v in pairs(Window.Pages) do v.Visible = false end
+            for i, v in pairs(Window.Tabs) do v.BackgroundColor3 = Color3.fromRGB(35, 35, 35) end
+            Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
         end)
-
-        table.insert(Window.Tabs, {P = Page, B = TBtn})
-        if #Window.Tabs == 1 then 
-            Page.Visible = true 
-            TBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-            TBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-        end
+        
+        if #Window.Tabs == 1 then Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60) end
 
         local Tab = {}
-
         function Tab:CreateSection(title, side)
             local Parent = (side == "Right" and Right or Left)
             local Sec = Instance.new("Frame", Parent)
-            Sec.BackgroundColor3 = Color3.fromRGB(18, 18, 18); Sec.Size = UDim2.new(1, 0, 0, 40)
-            Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 10)
+            Sec.BackgroundColor3 = Color3.fromRGB(20, 20, 20); Sec.Size = UDim2.new(1, 0, 0, 40)
+            Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 8)
             
-            local UIList = Instance.new("UIListLayout", Sec)
-            UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = "Center"
-            Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 5)
-            Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
+            local UIList = Instance.new("UIListLayout", Sec); UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = "Center"
+            Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
 
             local SecTitle = Instance.new("TextLabel", Sec)
-            SecTitle.Size = UDim2.new(1, 0, 0, 30); SecTitle.BackgroundTransparency = 1
-            SecTitle.Text = title; SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            SecTitle.Font = "GothamBold"; SecTitle.TextSize = 13; SecTitle.LayoutOrder = -1
+            SecTitle.Size = UDim2.new(1, -20, 0, 20); SecTitle.BackgroundTransparency = 1; SecTitle.Text = string.upper(title)
+            SecTitle.TextColor3 = Color3.fromRGB(0, 180, 255); SecTitle.Font = "GothamBold"; SecTitle.TextSize = 13; SecTitle.TextXAlignment = "Left"
 
             UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 15)
+                Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 20)
             end)
 
             local Ele = {}
-
             function Ele:AddToggle(text, cb)
-                local Tgl = Instance.new("TextButton", Sec)
-                Tgl.Size = UDim2.new(1, -20, 0, 35); Tgl.BackgroundTransparency = 1
-                Tgl.Text = "  "..text; Tgl.TextColor3 = Color3.fromRGB(180, 180, 180); Tgl.TextXAlignment = 0; Tgl.Font = "Gotham"; Tgl.TextSize = 13
+                local Tgl = Instance.new("TextButton", Sec); Tgl.Size = UDim2.new(1, -20, 0, 32); Tgl.BackgroundTransparency = 1; Tgl.Text = "  "..text; Tgl.TextColor3 = Color3.fromRGB(200, 200, 200); Tgl.TextXAlignment = 0; Tgl.Font = "Gotham"; Tgl.TextSize = 13
+                local Box = Instance.new("Frame", Tgl); Box.Size = UDim2.new(0, 18, 0, 18); Box.Position = UDim2.new(1, -22, 0.5, -9); Box.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
                 
-                local Circle = Instance.new("Frame", Tgl)
-                Circle.Size = UDim2.new(0, 20, 0, 20); Circle.Position = UDim2.new(1, -25, 0.5, -10)
-                Circle.BackgroundColor3 = Color3.fromRGB(50, 50, 50); Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
-
-                local Icon = Instance.new("ImageLabel", Circle)
-                Icon.Size = UDim2.new(0.7, 0, 0.7, 0); Icon.Position = UDim2.new(0.15, 0, 0.15, 0)
-                Icon.BackgroundTransparency = 1; Icon.Image = "rbxassetid://6031068433"
-                Icon.ImageTransparency = 1; Icon.ImageColor3 = Color3.fromRGB(0, 0, 0)
-
                 local State = false
                 Tgl.MouseButton1Click:Connect(function()
                     State = not State
-                    TweenService:Create(Circle, TweenInfo.new(0.2), {BackgroundColor3 = State and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(50, 50, 50)}):Play()
-                    TweenService:Create(Icon, TweenInfo.new(0.2), {ImageTransparency = State and 0 or 1}):Play()
+                    TweenService:Create(Box, TweenInfo.new(0.2), {BackgroundColor3 = State and Color3.fromRGB(0, 180, 255) or Color3.fromRGB(40, 40, 40)}):Play()
                     cb(State)
                 end)
             end
-
-            function Ele:AddButton(text, cb)
-                local Btn = Instance.new("TextButton", Sec)
-                Btn.Size = UDim2.new(1, -20, 0, 32); Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-                Btn.Text = text; Btn.TextColor3 = Color3.fromRGB(220, 220, 220); Btn.Font = "GothamBold"; Btn.TextSize = 12
-                Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
-                Btn.MouseButton1Click:Connect(cb)
-            end
-
-            function Ele:AddDropdown(text, list, cb)
-                local Drop = Instance.new("Frame", Sec)
-                Drop.Size = UDim2.new(1, -20, 0, 32); Drop.BackgroundColor3 = Color3.fromRGB(25, 25, 25); Drop.ClipsDescendants = true
-                Instance.new("UICorner", Drop).CornerRadius = UDim.new(0, 6)
-                
-                local Btn = Instance.new("TextButton", Drop)
-                Btn.Size = UDim2.new(1, 0, 0, 32); Btn.BackgroundTransparency = 1; Btn.Text = "  "..text.." : "..(list[1] or "None")
-                Btn.TextColor3 = Color3.fromRGB(180, 180, 180); Btn.TextXAlignment = 0; Btn.Font = "Gotham"; Btn.TextSize = 12
-                
-                local SFrame = Instance.new("ScrollingFrame", Drop)
-                SFrame.Position = UDim2.new(0, 0, 0, 32); SFrame.Size = UDim2.new(1, 0, 0, 100)
-                SFrame.BackgroundTransparency = 1; SFrame.ScrollBarThickness = 0; SFrame.AutomaticCanvasSize = "Y"
-                local DLY = Instance.new("UIListLayout", SFrame)
-                
-                local isOpened = false
-                Btn.MouseButton1Click:Connect(function()
-                    isOpened = not isOpened
-                    TweenService:Create(Drop, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = isOpened and UDim2.new(1, -20, 0, 135) or UDim2.new(1, -20, 0, 32)}):Play()
-                end)
-                
-                for _, v in pairs(list) do
-                    local Item = Instance.new("TextButton", SFrame)
-                    Item.Size = UDim2.new(1, 0, 0, 25); Item.BackgroundColor3 = Color3.fromRGB(35, 35, 35); Item.BorderSizePixel = 0
-                    Item.Text = v; Item.TextColor3 = Color3.fromRGB(150, 150, 150); Item.Font = "Gotham"; Item.TextSize = 11
-                    Item.MouseButton1Click:Connect(function()
-                        Btn.Text = "  "..text.." : "..v; isOpened = false
-                        TweenService:Create(Drop, TweenInfo.new(0.3), {Size = UDim2.new(1, -20, 0, 32)}):Play()
-                        cb(v)
-                    end)
-                end
-            end
-
             return Ele
         end
         return Tab
