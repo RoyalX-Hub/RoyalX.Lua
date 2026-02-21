@@ -27,8 +27,7 @@ function Library:CreateWindow(cfg)
 
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "RoyalX_Hub"
-    
-    -- Nút Logo mở lại Menu (Giống trong ảnh)
+                           
     local OpenBtn = Instance.new("ImageButton", ScreenGui)
     OpenBtn.Size = UDim2.new(0, 45, 0, 45)
     OpenBtn.Position = UDim2.new(0.5, -22, 0, 100)
@@ -36,8 +35,6 @@ function Library:CreateWindow(cfg)
     OpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
     OpenBtn.Visible = false
     Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 8)
-    local Stroke = Instance.new("UIStroke", OpenBtn)
-    Stroke.Color = Color3.fromRGB(0, 150, 255); Stroke.Thickness = 1.5
     MakeDraggable(OpenBtn)
 
     -- Khung chính
