@@ -64,14 +64,8 @@ function Library:CreateWindow(cfg)
             local SF = Instance.new("ScrollingFrame", Page)
             SF.Size = UDim2.new(0.5, -7, 1, 0); SF.Position = pos; SF.BackgroundTransparency = 1
             SF.ScrollBarThickness = 0; SF.CanvasSize = UDim2.new(0, 0, 0, 0)
-            SF.AutomaticCanvasSize = Enum.AutomaticCanvasSize.Y -- FIX VUỐT
+            SF.AutomaticCanvasSize = Enum.AutomaticCanvasSize.Y -- FIX GIỚI HẠN VUỐT
             local LY = Instance.new("UIListLayout", SF); LY.Padding = UDim.new(0, 15); LY.SortOrder = Enum.SortOrder.LayoutOrder
-            
-            -- Đảm bảo Canvas không bị thừa khoảng trắng
-            LY:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                SF.CanvasSize = UDim2.new(0, 0, 0, LY.AbsoluteContentSize.Y)
-            end)
-            
             return SF
         end
         local Left = CreateCol(UDim2.new(0,0,0,0)); local Right = CreateCol(UDim2.new(0.5,7,0,0))
@@ -90,17 +84,17 @@ function Library:CreateWindow(cfg)
             
             local UIList = Instance.new("UIListLayout", Sec)
             UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = "Center"
-            Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 5) -- Khoảng cách nhỏ từ mép trên đến tiêu đề
+            Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 35) -- Chừa chỗ cho Title ở trên cùng bên trong
             Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
 
-            -- [ TIÊU ĐỀ: Ở TRONG SEC & CHÍNH GIỮA TRÊN CÙNG ]
+            -- [ FIX TIÊU ĐỀ: VÀO TRONG SEC & CHÍNH GIỮA TRÊN CÙNG ]
             local SecTitle = Instance.new("TextLabel", Sec)
-            SecTitle.Size = UDim2.new(1, 0, 0, 30)
+            SecTitle.Size = UDim2.new(1, 0, 0, 30); SecTitle.Position = UDim2.new(0, 0, 0, -35)
             SecTitle.BackgroundTransparency = 1; SecTitle.Text = title; SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            SecTitle.Font = "GothamBold"; SecTitle.TextSize = 13; SecTitle.ZIndex = 5; SecTitle.LayoutOrder = -1 -- Luôn ở trên cùng
+            SecTitle.Font = "GothamBold"; SecTitle.TextSize = 13; SecTitle.ZIndex = 5
 
             UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 15)
+                Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 45)
             end)
 
             local Ele = {}
@@ -132,14 +126,8 @@ function Library:CreateWindow(cfg)
                 Btn.TextColor3 = Color3.fromRGB(200, 200, 200); Btn.TextXAlignment = 0; Btn.Font = "Gotham"; Btn.TextSize = 12
                 local SFrame = Instance.new("ScrollingFrame", Drop)
                 SFrame.Position = UDim2.new(0, 0, 0, 32); SFrame.Size = UDim2.new(1, 0, 0, 100); SFrame.BackgroundTransparency = 1; SFrame.ScrollBarThickness = 0
-                SFrame.AutomaticCanvasSize = "Y" 
-                SFrame.CanvasSize = UDim2.new(0,0,0,0)
-                local DLY = Instance.new("UIListLayout", SFrame)
-                
-                DLY:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                    SFrame.CanvasSize = UDim2.new(0, 0, 0, DLY.AbsoluteContentSize.Y)
-                end)
-
+                SFrame.AutomaticCanvasSize = "Y" -- FIX GIỚI HẠN VUỐT TRONG DROPDOWN
+                Instance.new("UIListLayout", SFrame)
                 local isOpened = false
                 Btn.MouseButton1Click:Connect(function()
                     isOpened = not isOpened
@@ -162,5 +150,5 @@ function Library:CreateWindow(cfg)
     end
     return Window
 end
-
+                           
 return Library
