@@ -3,7 +3,6 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
--- [ Hàm kéo thả ]
 local function MakeDraggable(gui)
     local dragging, dragInput, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -30,7 +29,6 @@ function Library:CreateWindow(cfg)
     ScreenGui.Name = "RoyalX_Hub"
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- [ NÚT LOGO MỞ KHI ĐÓNG MENU ]
     local LogoOpenBtn = Instance.new("ImageButton", ScreenGui)
     LogoOpenBtn.Size = UDim2.new(0, 60, 0, 60)
     LogoOpenBtn.Position = UDim2.new(0, 50, 0, 150)
@@ -40,17 +38,15 @@ function Library:CreateWindow(cfg)
     Instance.new("UICorner", LogoOpenBtn).CornerRadius = UDim.new(0, 12)
     MakeDraggable(LogoOpenBtn)
 
-    -- [ KHUNG CHÍNH ]
     local Main = Instance.new("Frame", ScreenGui)
     Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Size = UDim2.new(0, 580, 0, 380)
-    Main.ClipsDescendants = false -- Phải để false để tiêu đề hiện đè lên trên
+    Main.ClipsDescendants = false 
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
     MakeDraggable(Main)
 
-    -- [ LOGO BÊN TRONG UI ]
     local InnerLogo = Instance.new("ImageLabel", Main)
     InnerLogo.Size = UDim2.new(0, 40, 0, 40)
     InnerLogo.Position = UDim2.new(0, 12, 0, 10)
@@ -58,7 +54,6 @@ function Library:CreateWindow(cfg)
     InnerLogo.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
     Instance.new("UICorner", InnerLogo).CornerRadius = UDim.new(0, 8)
 
-    -- [ THANH TAB BAR ]
     local TabBar = Instance.new("Frame", Main)
     TabBar.Size = UDim2.new(1, -75, 0, 40)
     TabBar.Position = UDim2.new(0, 65, 0, 10)
@@ -101,7 +96,9 @@ function Library:CreateWindow(cfg)
         local function CreateCol(pos)
             local SF = Instance.new("ScrollingFrame", Page)
             SF.Size = UDim2.new(0.5, -7, 1, 0); SF.Position = pos; SF.BackgroundTransparency = 1; SF.ScrollBarThickness = 0; SF.AutomaticCanvasSize = "Y"
-            Instance.new("UIListLayout", SF).Padding = UDim.new(0, 20) -- Tăng khoảng cách để không đè tiêu đề
+            -- Padding lớn ở Top để chừa chỗ cho tiêu đề nhảy lên trên
+            Instance.new("UIPadding", SF).PaddingTop = UDim.new(0, 30) 
+            Instance.new("UIListLayout", SF).Padding = UDim.new(0, 15)
             return SF
         end
         local Left = CreateCol(UDim2.new(0,0,0,0))
@@ -118,31 +115,36 @@ function Library:CreateWindow(cfg)
 
         function Tab:CreateSection(title, side)
             local Parent = (side == "Right" and Right or Left)
-            local Sec = Instance.new("Frame", Parent)
+            
+            -- Khung bọc tiêu đề và nội dung
+            local SecGroup = Instance.new("Frame", Parent)
+            SecGroup.Size = UDim2.new(1, 0, 0, 0)
+            SecGroup.BackgroundTransparency = 1
+            
+            -- [ TIÊU ĐỀ NẰM TRÊN HẲN ]
+            local SecTitle = Instance.new("TextLabel", SecGroup)
+            SecTitle.Size = UDim2.new(1, 0, 0, 25)
+            SecTitle.Position = UDim2.new(0, 5, 0, -25) -- Đẩy lên trên khung chức năng
+            SecTitle.BackgroundTransparency = 1
+            SecTitle.Text = title
+            SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+            SecTitle.Font = "GothamBold"
+            SecTitle.TextSize = 14
+            SecTitle.TextXAlignment = Enum.TextXAlignment.Left
+
+            -- [ KHUNG CHỨA CHỨC NĂNG ]
+            local Sec = Instance.new("Frame", SecGroup)
+            Sec.Size = UDim2.new(1, 0, 0, 35)
             Sec.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
-            Sec.BorderSizePixel = 0
             Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 8)
             
             local UIList = Instance.new("UIListLayout", Sec)
             UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = "Center"
-            Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 18); Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
-
-            -- [ TIÊU ĐỀ NẰM ĐÈ GIỮA VIỀN ]
-            local SecTitle = Instance.new("TextLabel", Sec)
-            SecTitle.Name = "Title"
-            SecTitle.AutomaticSize = Enum.AutomaticSize.X
-            SecTitle.Size = UDim2.new(0, 0, 0, 20)
-            SecTitle.AnchorPoint = Vector2.new(0.5, 0.5)
-            SecTitle.Position = UDim2.new(0.5, 0, 0, 0) -- Giữa viền trên
-            SecTitle.BackgroundColor3 = Color3.fromRGB(18, 18, 18) -- Đè lên viền
-            SecTitle.Text = " ✨ " .. title .. " ✨ "
-            SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            SecTitle.Font = "GothamBold"
-            SecTitle.TextSize = 13
-            SecTitle.ZIndex = 10
+            Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 10); Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
 
             UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 28)
+                Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 20)
+                SecGroup.Size = UDim2.new(1, 0, 0, Sec.Size.Y.Offset + 30)
             end)
 
             local Ele = {}
@@ -203,16 +205,16 @@ function Library:CreateWindow(cfg)
     return Window
 end
 
--- [[ DEMO CODE ]]
+-- [[ DEMO SỬ DỤNG ]]
 local Win = Library:CreateWindow({Name = "RoyalX Hub", Logo = "107831103893115"})
 local Tab1 = Win:CreateTab("Main")
 
+-- Chữ "Settings" giờ sẽ nằm riêng biệt phía trên khung đen
 local Sec1 = Tab1:CreateSection("Settings", "Left")
 Sec1:AddToggle("Attack", function(v) end)
 Sec1:AddDropdown("Weapon", {"Melee", "Sword", "Fruit"}, function(v) end)
 
 local Sec2 = Tab1:CreateSection("Auto Farming", "Right")
-Sec2:AddButton("Fast Farm", function() end)
-Sec2:AddToggle("Auto Click", function(v) end)
+Sec2:AddButton("Start Farm", function() end)
 
 return Library
