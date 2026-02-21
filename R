@@ -29,9 +29,12 @@ function Library:CreateWindow(cfg)
 
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "RoyalX_Hub"
-    
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.DisplayOrder = 999
+
+    -- [ NÚT LOGO MỞ MENU - KHÔNG VIỀN ]
     local LogoBtn = Instance.new("ImageButton", ScreenGui)
-    LogoBtn.Size = UDim2.new(0, 55, 0, 55)
+    LogoBtn.Size = UDim2.new(0, 50, 0, 50)
     LogoBtn.Position = UDim2.new(0, 50, 0, 150)
     LogoBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     LogoBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
@@ -39,15 +42,18 @@ function Library:CreateWindow(cfg)
     Instance.new("UICorner", LogoBtn).CornerRadius = UDim.new(0, 10)
     MakeDraggable(LogoBtn)
 
+    -- [ KHUNG CHÍNH ]
     local Main = Instance.new("Frame", ScreenGui)
     Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Size = UDim2.new(0, 580, 0, 380)
-    Main.ClipsDescendants = false -- Đổi thành false để hiện viền RGB bên ngoài
+    Main.ClipsDescendants = false 
+    Main.Visible = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
     MakeDraggable(Main)
 
+    -- [ VIỀN RGB CHO MENU CHÍNH ]
     local MainStroke = Instance.new("UIStroke", Main)
     MainStroke.Thickness = 2
     MainStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
@@ -55,12 +61,13 @@ function Library:CreateWindow(cfg)
     task.spawn(function()
         local hue = 0
         while task.wait() do
-            hue = hue + 0.01
+            hue = hue + 0.005
             if hue > 1 then hue = 0 end
-            MainStroke.Color = Color3.fromHSV(hue, 0.8, 1) -- Độ bão hòa 0.8 cho màu tươi
+            MainStroke.Color = Color3.fromHSV(hue, 0.8, 1)
         end
     end)
-                           
+
+    -- [ THANH TAB BAR ]
     local TabBar = Instance.new("Frame", Main)
     TabBar.Size = UDim2.new(1, -20, 0, 40)
     TabBar.Position = UDim2.new(0, 10, 0, 10)
@@ -157,9 +164,21 @@ function Library:CreateWindow(cfg)
                     cb(State)
                 end)
             end
+            
+            function Ele:AddButton(text, cb)
+                local Btn = Instance.new("TextButton", Sec)
+                Btn.Size = UDim2.new(1, 0, 0, 32); Btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                Btn.Text = text; Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                Btn.Font = "GothamBold"; Btn.TextSize = 11
+                Instance.new("UICorner", Btn).CornerRadius = UDim.new(0, 6)
+                Btn.MouseButton1Click:Connect(cb)
+            end
+
             return Ele
         end
         return Tab
     end
     return Window
 end
+
+return Library
