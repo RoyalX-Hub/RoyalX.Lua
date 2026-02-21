@@ -3,6 +3,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
+-- [ KHỞI TẠO CƠ BẢN ]
 function Library:CreateWindow(cfg)
     local cfg = cfg or {}
     if CoreGui:FindFirstChild("RoyalX_Hub") then CoreGui["RoyalX_Hub"]:Destroy() end
@@ -10,65 +11,17 @@ function Library:CreateWindow(cfg)
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "RoyalX_Hub"
     
-    -- [ NÚT MỞ MENU - ĐƯA RA GÓC ]
-    local LogoOpenBtn = Instance.new("ImageButton", ScreenGui)
-    LogoOpenBtn.Size = UDim2.new(0, 50, 0, 50)
-    LogoOpenBtn.Position = UDim2.new(0, 20, 0, 20) -- Vị trí góc trên bên trái
-    LogoOpenBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    LogoOpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
-    LogoOpenBtn.Visible = false
-    local OpenCorner = Instance.new("UICorner", LogoOpenBtn)
-    OpenCorner.CornerRadius = UDim.new(0, 10)
-    
-    local function MakeDraggable(gui)
-        local dragging, dragInput, dragStart, startPos
-        gui.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                dragging = true; dragStart = input.Position; startPos = gui.Position
-            end
-        end)
-        UserInputService.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                local delta = input.Position - dragStart
-                gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-            end
-        end)
-        gui.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = false end
-        end)
-    end
-    MakeDraggable(LogoOpenBtn)
-
-    -- [ KHUNG CHÍNH ]
     local Main = Instance.new("CanvasGroup", ScreenGui)
-    Main.Size = UDim2.new(0, 580, 0, 380)
-    Main.Position = UDim2.new(0.5, 0, 0.5, 0)
-    Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+    Main.Size = UDim2.new(0, 580, 0, 380); Main.Position = UDim2.new(0.5, 0, 0.5, 0); Main.AnchorPoint = Vector2.new(0.5, 0.5)
+    Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12); Main.ClipsDescendants = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
-    MakeDraggable(Main)
 
-    local function ToggleUI(state)
-        if state then
-            Main.Visible = true
-            TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back), {Size = UDim2.new(0, 580, 0, 380), GroupTransparency = 0}):Play()
-            LogoOpenBtn.Visible = false
-        else
-            TweenService:Create(Main, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Size = UDim2.new(0, 0, 0, 0), GroupTransparency = 1}):Play()
-            task.delay(0.3, function() Main.Visible = false; LogoOpenBtn.Visible = true end)
-        end
-    end
-
+    -- [ TAB BAR ]
     local TabBar = Instance.new("Frame", Main)
     TabBar.Size = UDim2.new(1, -75, 0, 40); TabBar.Position = UDim2.new(0, 65, 0, 10); TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22); Instance.new("UICorner", TabBar)
 
-    local CloseBtn = Instance.new("TextButton", TabBar)
-    CloseBtn.Size = UDim2.new(0, 35, 1, 0); CloseBtn.Position = UDim2.new(1, -35, 0, 0); CloseBtn.Text = "×"; CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255); CloseBtn.BackgroundTransparency = 1; CloseBtn.TextSize = 26; CloseBtn.Font = "GothamBold"
-    CloseBtn.MouseButton1Click:Connect(function() ToggleUI(false) end)
-    LogoOpenBtn.MouseButton1Click:Connect(function() ToggleUI(true) end)
-
     local TabScroll = Instance.new("ScrollingFrame", TabBar)
-    TabScroll.Size = UDim2.new(1, -40, 1, 0); TabScroll.Position = UDim2.new(0, 5, 0, 0); TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0; TabScroll.AutomaticCanvasSize = "X"; TabScroll.CanvasSize = UDim2.new(0,0,0,0)
+    TabScroll.Size = UDim2.new(1, -10, 1, 0); TabScroll.Position = UDim2.new(0, 5, 0, 0); TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0; TabScroll.AutomaticCanvasSize = "X"; TabScroll.CanvasSize = UDim2.new(0,0,0,0)
     local TabList = Instance.new("UIListLayout", TabScroll); TabList.FillDirection = "Horizontal"; TabList.Padding = UDim.new(0, 8); TabList.VerticalAlignment = "Center"
 
     local Container = Instance.new("Frame", Main)
@@ -77,9 +30,12 @@ function Library:CreateWindow(cfg)
     local Window = { CurrentTab = nil }
 
     function Window:CreateTab(name)
+        -- Nút Tab (Màu xám cố định theo yêu cầu trước)
         local TBtn = Instance.new("TextButton", TabScroll)
-        TBtn.Size = UDim2.new(0, 90, 0, 28); TBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35); TBtn.Text = name; TBtn.TextColor3 = Color3.fromRGB(255, 255, 255); TBtn.Font = "GothamBold"; TBtn.TextSize = 11; Instance.new("UICorner", TBtn)
+        TBtn.Size = UDim2.new(0, 90, 0, 28); TBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        TBtn.Text = name; TBtn.TextColor3 = Color3.fromRGB(255, 255, 255); TBtn.Font = "GothamBold"; TBtn.TextSize = 11; Instance.new("UICorner", TBtn)
 
+        -- Trang nội dung (Dùng CanvasGroup để slide mượt hơn)
         local Page = Instance.new("CanvasGroup", Container)
         Page.Size = UDim2.new(1, 0, 1, 0); Page.BackgroundTransparency = 1; Page.Visible = false; Page.GroupTransparency = 1
 
@@ -91,19 +47,39 @@ function Library:CreateWindow(cfg)
         end
         local Left = CreateCol(UDim2.new(0,0,0,0)); local Right = CreateCol(UDim2.new(0.5,7,0,0))
 
-        TBtn.MouseButton1Click:Connect(function()
+        -- [ ANIMATION CHUYỂN TAB MỚI ]
+        local function SwitchTab()
             if Window.CurrentTab == Page then return end
+            
+            -- Trang cũ trượt ra và biến mất
             if Window.CurrentTab then
-                TweenService:Create(Window.CurrentTab, TweenInfo.new(0.3), {GroupTransparency = 1, Position = UDim2.new(0, -30, 0, 0)}):Play()
-                local old = Window.CurrentTab; task.delay(0.3, function() old.Visible = false end)
+                local OldPage = Window.CurrentTab
+                TweenService:Create(OldPage, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+                    GroupTransparency = 1,
+                    Position = UDim2.new(0, -50, 0, 0) -- Trượt sang trái
+                }):Play()
+                task.delay(0.3, function() OldPage.Visible = false end)
             end
-            Page.Visible = true; Page.Position = UDim2.new(0, 30, 0, 0)
-            TweenService:Create(Page, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {GroupTransparency = 0, Position = UDim2.new(0, 0, 0, 0)}):Play()
-            Window.CurrentTab = Page
-        end)
 
+            -- Trang mới trượt vào
+            Page.Visible = true
+            Page.Position = UDim2.new(0, 50, 0, 0) -- Bắt đầu từ bên phải
+            Page.GroupTransparency = 1
+            
+            TweenService:Create(Page, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+                GroupTransparency = 0,
+                Position = UDim2.new(0, 0, 0, 0) -- Trượt về vị trí chính giữa
+            }):Play()
+
+            Window.CurrentTab = Page
+        end
+
+        TBtn.MouseButton1Click:Connect(SwitchTab)
+
+        -- Tự động hiện Tab đầu tiên
         if not Window.CurrentTab then
-            Page.Visible = true; Page.GroupTransparency = 0; Window.CurrentTab = Page
+            Page.Visible = true; Page.GroupTransparency = 0; Page.Position = UDim2.new(0,0,0,0)
+            Window.CurrentTab = Page
         end
 
         local Tab = {}
@@ -122,33 +98,22 @@ function Library:CreateWindow(cfg)
             end)
 
             local Ele = {}
-            -- [ TOGGLE FIX 100% ]
+            -- [ TOGGLE MỚI THEO ẢNH ]
             function Ele:AddToggle(text, cb)
                 local TglBtn = Instance.new("TextButton", Sec)
                 TglBtn.Size = UDim2.new(1, -16, 0, 35); TglBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 24); TglBtn.Text = "  " .. text; TglBtn.TextColor3 = Color3.fromRGB(200, 200, 200); TglBtn.Font = "Gotham"; TglBtn.TextSize = 12; TglBtn.TextXAlignment = "Left"; Instance.new("UICorner", TglBtn)
 
                 local CheckFrame = Instance.new("Frame", TglBtn)
-                CheckFrame.Size = UDim2.new(0, 22, 0, 22); CheckFrame.Position = UDim2.new(1, -30, 0.5, -11); CheckFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-                local cfCorner = Instance.new("UICorner", CheckFrame); cfCorner.CornerRadius = UDim.new(1, 0)
+                CheckFrame.Size = UDim2.new(0, 22, 0, 22); CheckFrame.Position = UDim2.new(1, -30, 0.5, -11); CheckFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45); Instance.new("UICorner", CheckFrame).CornerRadius = UDim.new(1, 0)
                 
-                -- Dấu chấm tròn bên trong (Thay cho Icon ảnh)
-                local InnerDot = Instance.new("Frame", CheckFrame)
-                InnerDot.Size = UDim2.new(0, 0, 0, 0)
-                InnerDot.Position = UDim2.new(0.5, 0, 0.5, 0)
-                InnerDot.AnchorPoint = Vector2.new(0.5, 0.5)
-                InnerDot.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-                Instance.new("UICorner", InnerDot).CornerRadius = UDim.new(1, 0)
+                local CheckIcon = Instance.new("ImageLabel", CheckFrame)
+                CheckIcon.Size = UDim2.new(0, 0, 0, 0); CheckIcon.Position = UDim2.new(0.5, 0, 0.5, 0); CheckIcon.AnchorPoint = Vector2.new(0.5, 0.5); CheckIcon.Image = "rbxassetid://11552553104"; CheckIcon.BackgroundTransparency = 1; CheckIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
 
                 local State = false
                 TglBtn.MouseButton1Click:Connect(function()
                     State = not State
-                    if State then
-                        TweenService:Create(CheckFrame, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(0, 190, 255)}):Play()
-                        TweenService:Create(InnerDot, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Size = UDim2.new(0, 12, 0, 12)}):Play()
-                    else
-                        TweenService:Create(CheckFrame, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
-                        TweenService:Create(InnerDot, TweenInfo.new(0.2), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-                    end
+                    TweenService:Create(CheckFrame, TweenInfo.new(0.2), {BackgroundColor3 = State and Color3.fromRGB(0, 190, 255) or Color3.fromRGB(45, 45, 45)}):Play()
+                    CheckIcon:TweenSize(State and UDim2.new(0.7, 0, 0.7, 0) or UDim2.new(0, 0, 0, 0), "Out", "Back", 0.2, true)
                     cb(State)
                 end)
             end
@@ -164,4 +129,4 @@ function Library:CreateWindow(cfg)
     return Window
 end
 
-return Libraryrn Library
+return Library
