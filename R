@@ -30,7 +30,7 @@ function Library:CreateWindow(cfg)
                            
     local OpenBtn = Instance.new("ImageButton", ScreenGui)
     OpenBtn.Size = UDim2.new(0, 45, 0, 45)
-    OpenBtn.Position = UDim2.new(0.5, -22, 0, 100)
+    OpenBtn.Position = UDim2.new(0, 50, 0, 150)
     OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     OpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
     OpenBtn.Visible = false
