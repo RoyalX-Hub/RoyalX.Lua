@@ -29,7 +29,7 @@ function Library:CreateWindow(cfg)
     ScreenGui.Name = "RoyalX_Hub"
                            
     local OpenBtn = Instance.new("ImageButton", ScreenGui)
-    OpenBtn.Size = UDim2.new(0, 45, 0, 45)
+    OpenBtn.Size = UDim2.new(0, 55, 0, 55)
     OpenBtn.Position = UDim2.new(0, 50, 0, 150)
     OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     OpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
@@ -56,7 +56,7 @@ function Library:CreateWindow(cfg)
 
     -- Logo nhỏ trong Tab Bar
     local SmallLogo = Instance.new("ImageLabel", TabBar)
-    SmallLogo.Size = UDim2.new(0, 28, 0, 28)
+    SmallLogo.Size = UDim2.new(0, 30, 0, 30)
     SmallLogo.Position = UDim2.new(0, 6, 0.5, -14)
     SmallLogo.BackgroundTransparency = 1
     SmallLogo.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
@@ -88,7 +88,7 @@ function Library:CreateWindow(cfg)
 
     function Window:CreateTab(name)
         local TBtn = Instance.new("TextButton", TabScroll)
-        TBtn.Size = UDim2.new(0, 100, 0, 30); TBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        TBtn.Size = UDim2.new(0, 100, 0, 30); TBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
         TBtn.Text = name; TBtn.TextColor3 = Color3.fromRGB(200, 200, 200); TBtn.Font = "GothamBold"; TBtn.TextSize = 12
         Instance.new("UICorner", TBtn).CornerRadius = UDim.new(0, 6)
 
