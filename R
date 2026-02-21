@@ -3,9 +3,13 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local CoreGui = game:GetService("CoreGui")
 
--- [ FIX DRAGGING: KHÔNG BỊ ĐỨT KHI DI CHUYỂN NHANH ]
+-- [ FIX DRAGGING: MƯỢT MÀ VÀ KHÔNG BỊ KHỰA ]
 local function MakeDraggable(gui)
     local dragging, dragInput, dragStart, startPos
+    local function update(input)
+        local delta = input.Position - dragStart
+        gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
     gui.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true; dragStart = input.Position; startPos = gui.Position
@@ -14,11 +18,13 @@ local function MakeDraggable(gui)
             end)
         end
     end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - dragStart
-            gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    gui.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
         end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then update(input) end
     end)
 end
 
@@ -30,7 +36,7 @@ function Library:CreateWindow(cfg)
     ScreenGui.Name = "RoyalX_Hub"
 
     local LogoOpenBtn = Instance.new("ImageButton", ScreenGui)
-    LogoOpenBtn.Size = UDim2.size(50, 50); LogoOpenBtn.Position = UDim2.new(0, 50, 0, 150)
+    LogoOpenBtn.Size = UDim2.new(0, 50, 0, 50); LogoOpenBtn.Position = UDim2.new(0, 50, 0, 150)
     LogoOpenBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25); LogoOpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
     LogoOpenBtn.Visible = false; Instance.new("UICorner", LogoOpenBtn); MakeDraggable(LogoOpenBtn)
 
@@ -39,6 +45,7 @@ function Library:CreateWindow(cfg)
     Main.AnchorPoint = Vector2.new(0.5, 0.5); Main.Size = UDim2.new(0, 580, 0, 380)
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10); MakeDraggable(Main)
 
+    -- TabBar, CloseBtn giữ nguyên logic cũ nhưng đảm bảo không chặn drag
     local TabBar = Instance.new("Frame", Main)
     TabBar.Size = UDim2.new(1, -75, 0, 40); TabBar.Position = UDim2.new(0, 65, 0, 10)
     TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22); Instance.new("UICorner", TabBar)
@@ -70,7 +77,7 @@ function Library:CreateWindow(cfg)
             local SF = Instance.new("ScrollingFrame", Page)
             SF.Size = UDim2.new(0.5, -7, 1, 0); SF.Position = pos; SF.BackgroundTransparency = 1; SF.ScrollBarThickness = 0
             SF.CanvasSize = UDim2.new(0, 0, 0, 0); SF.AutomaticCanvasSize = "Y"
-            local LY = Instance.new("UIListLayout", SF); LY.Padding = UDim.new(0, 15); LY.SortOrder = Enum.SortOrder.LayoutOrder
+            Instance.new("UIListLayout", SF).Padding = UDim.new(0, 15); Instance.new("UIListLayout", SF).SortOrder = Enum.SortOrder.LayoutOrder
             return SF
         end
         local Left = CreateCol(UDim2.new(0,0,0,0)); local Right = CreateCol(UDim2.new(0.5,7,0,0))
@@ -94,11 +101,10 @@ function Library:CreateWindow(cfg)
             UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = "Center"; UIList.SortOrder = Enum.SortOrder.LayoutOrder
             Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 5); Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
 
-            -- [ FIX SECTITLE: LUÔN TRÊN CÙNG ]
             local SecTitle = Instance.new("TextLabel", Sec)
             SecTitle.Size = UDim2.new(1, 0, 0, 30); SecTitle.BackgroundTransparency = 1; SecTitle.Text = title
             SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255); SecTitle.Font = "GothamBold"; SecTitle.TextSize = 13
-            SecTitle.LayoutOrder = -100 -- Ép nó lên đầu danh sách Layout
+            SecTitle.LayoutOrder = -100 -- Ép lên trên cùng
 
             UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
                 Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 15)
@@ -108,7 +114,6 @@ function Library:CreateWindow(cfg)
             function Ele:AddToggle(text, cb)
                 local Tgl = Instance.new("TextButton", Sec); Tgl.Size = UDim2.new(1, -20, 0, 35); Tgl.BackgroundTransparency = 1
                 Tgl.Text = "  "..text; Tgl.TextColor3 = Color3.fromRGB(180, 180, 180); Tgl.TextXAlignment = 0; Tgl.Font = "Gotham"; Tgl.TextSize = 13
-                Tgl.LayoutOrder = 1 -- Các chức năng sẽ có LayoutOrder lớn hơn Title
                 
                 local Circle = Instance.new("Frame", Tgl); Circle.Size = UDim2.new(0, 20, 0, 20); Circle.Position = UDim2.new(1, -25, 0.5, -10)
                 Circle.BackgroundColor3 = Color3.fromRGB(50, 50, 50); Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
@@ -127,7 +132,7 @@ function Library:CreateWindow(cfg)
             function Ele:AddDropdown(text, list, cb)
                 local Drop = Instance.new("Frame", Sec)
                 Drop.Size = UDim2.new(1, -20, 0, 32); Drop.BackgroundColor3 = Color3.fromRGB(25, 25, 25); Drop.ClipsDescendants = true
-                Drop.LayoutOrder = 2; Instance.new("UICorner", Drop).CornerRadius = UDim.new(0, 6)
+                Instance.new("UICorner", Drop).CornerRadius = UDim.new(0, 6)
                 
                 local Btn = Instance.new("TextButton", Drop)
                 Btn.Size = UDim2.new(1, 0, 0, 32); Btn.BackgroundTransparency = 1; Btn.Text = "  "..text.." : "..(list[1] or "None")
@@ -136,14 +141,20 @@ function Library:CreateWindow(cfg)
                 local SFrame = Instance.new("ScrollingFrame", Drop)
                 SFrame.Position = UDim2.new(0, 0, 0, 32); SFrame.Size = UDim2.new(1, 0, 0, 100)
                 SFrame.BackgroundTransparency = 1; SFrame.ScrollBarThickness = 0
-                -- [ FIX DROP VUỐT: CHỈ CÓ CANVAS KHI CÓ ITEM ]
-                SFrame.CanvasSize = UDim2.new(0, 0, 0, 0); SFrame.AutomaticCanvasSize = "Y"
+                -- [ FIX DROPDOWN SCROLL ]
+                SFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
                 local DLY = Instance.new("UIListLayout", SFrame)
+                
+                -- Cập nhật CanvasSize dựa trên số lượng item thật
+                DLY:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    SFrame.CanvasSize = UDim2.new(0, 0, 0, DLY.AbsoluteContentSize.Y)
+                end)
                 
                 local isOpened = false
                 Btn.MouseButton1Click:Connect(function()
                     isOpened = not isOpened
-                    TweenService:Create(Drop, TweenInfo.new(0.3), {Size = isOpened and UDim2.new(1, -20, 0, 135) or UDim2.new(1, -20, 0, 32)}):Play()
+                    local targetSize = isOpened and UDim2.new(1, -20, 0, 135) or UDim2.new(1, -20, 0, 32)
+                    TweenService:Create(Drop, TweenInfo.new(0.3), {Size = targetSize}):Play()
                 end)
                 
                 for _, v in pairs(list) do
