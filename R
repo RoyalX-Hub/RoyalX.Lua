@@ -43,7 +43,7 @@ function Library:CreateWindow(cfg)
 
     -- [ KHUNG CHÍNH ]
     local Main = Instance.new("Frame", ScreenGui)
-    Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0) -- ĐEN THUẦN
+    Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Size = UDim2.new(0, 600, 0, 400)
@@ -63,7 +63,7 @@ function Library:CreateWindow(cfg)
     local TabBar = Instance.new("Frame", Main)
     TabBar.Size = UDim2.new(1, -75, 0, 40)
     TabBar.Position = UDim2.new(0, 65, 0, 10)
-    TabBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- ĐEN NHẠT
+    TabBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     Instance.new("UICorner", TabBar)
 
     local TabScroll = Instance.new("ScrollingFrame", TabBar)
@@ -74,7 +74,7 @@ function Library:CreateWindow(cfg)
     local TabList = Instance.new("UIListLayout", TabScroll)
     TabList.FillDirection = "Horizontal"; TabList.Padding = UDim.new(0, 8); TabList.VerticalAlignment = "Center"
 
-    -- [ NÚT ĐÓNG (X) - ĐÃ FIX KHÔNG HIỆN ]
+    -- [ NÚT ĐÓNG (X) ]
     local CloseBtn = Instance.new("TextButton", TabBar)
     CloseBtn.Size = UDim2.new(0, 35, 1, 0)
     CloseBtn.Position = UDim2.new(1, -35, 0, 0)
@@ -83,7 +83,7 @@ function Library:CreateWindow(cfg)
     CloseBtn.BackgroundTransparency = 1
     CloseBtn.TextSize = 35
     CloseBtn.Font = "GothamBold"
-    CloseBtn.ZIndex = 100 -- Đảm bảo luôn ở trên cùng
+    CloseBtn.ZIndex = 100
 
     -- [ ANIMATION BẬT/TẮT MENU ]
     local IsOpened = true
@@ -171,17 +171,21 @@ function Library:CreateWindow(cfg)
             local Sec = Instance.new("Frame", Parent)
             Sec.Size = UDim2.new(1, 0, 0, 35); Sec.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
             Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 8)
+            
             local UIList = Instance.new("UIListLayout", Sec)
             UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = "Center"
+            UIList.SortOrder = Enum.SortOrder.LayoutOrder
+
             Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 35)
             Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
 
-            -- [ TITLE SECTION - CĂN GIỮA ]
+            -- [ TITLE SECTION - ĐÃ FIX VỊ TRÍ LÊN TRÊN CÙNG ]
             local SecTitle = Instance.new("TextLabel", Sec)
             SecTitle.Size = UDim2.new(1, 0, 0, 30); SecTitle.Position = UDim2.new(0, 0, 0, -35)
             SecTitle.Text = title:upper(); SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
             SecTitle.BackgroundTransparency = 1; SecTitle.Font = "GothamBold"; SecTitle.TextSize = 11
             SecTitle.TextXAlignment = Enum.TextXAlignment.Center
+            SecTitle.LayoutOrder = -1 -- Đảm bảo luôn ở trên cùng
 
             UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
                 Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 45)
@@ -200,7 +204,6 @@ function Library:CreateWindow(cfg)
                 Box.Size = UDim2.new(0, 16, 0, 16); Box.Position = UDim2.new(1, -26, 0.5, -8); Box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
                 Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
                 
-                -- [ HÌNH TRÒN TRONG TOGGLE ]
                 local Circle = Instance.new("Frame", Box)
                 Circle.Size = UDim2.new(0, 0, 0, 0); Circle.Position = UDim2.new(0.5, 0, 0.5, 0)
                 Circle.AnchorPoint = Vector2.new(0.5, 0.5); Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
