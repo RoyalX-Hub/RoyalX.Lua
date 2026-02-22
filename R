@@ -74,18 +74,18 @@ function Library:CreateWindow(cfg)
     local TabList = Instance.new("UIListLayout", TabScroll)
     TabList.FillDirection = "Horizontal"; TabList.Padding = UDim.new(0, 8); TabList.VerticalAlignment = "Center"
 
-    -- [ NÚT ĐÓNG (X) ]
+    -- [ NÚT ĐÓNG (X) - ĐÃ FIX KHÔNG HIỆN ]
     local CloseBtn = Instance.new("TextButton", TabBar)
     CloseBtn.Size = UDim2.new(0, 35, 1, 0)
     CloseBtn.Position = UDim2.new(1, -35, 0, 0)
     CloseBtn.Text = "×"
     CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
     CloseBtn.BackgroundTransparency = 1
-    CloseBtn.TextSize = 30
+    CloseBtn.TextSize = 35
     CloseBtn.Font = "GothamBold"
-    CloseBtn.ZIndex = 10
+    CloseBtn.ZIndex = 100 -- Đảm bảo luôn ở trên cùng
 
-    -- [ ANIMATION BẬT/TẮT MENU MỚI ]
+    -- [ ANIMATION BẬT/TẮT MENU ]
     local IsOpened = true
     local function ToggleUI()
         IsOpened = not IsOpened
@@ -128,7 +128,6 @@ function Library:CreateWindow(cfg)
             SF.CanvasSize = UDim2.new(0, 0, 0, 0)
             SF.ScrollingEnabled = false
             
-            -- [ GIỚI HẠN VUỐT CHÍNH XÁC ]
             local function UpdateScrolling()
                 if SF.AbsoluteCanvasSize.Y > SF.AbsoluteSize.Y + 5 then
                     SF.ScrollingEnabled = true
@@ -145,7 +144,6 @@ function Library:CreateWindow(cfg)
         local Left = CreateCol(UDim2.new(0,0,0,0))
         local Right = CreateCol(UDim2.new(0.5,7,0,0))
 
-        -- [ BỎ ANIMATION CHUYỂN TAB ]
         TBtn.MouseButton1Click:Connect(function()
             if Window.CurrentTab and Window.CurrentTab.B ~= TBtn then
                 Window.CurrentTab.P.Visible = false
@@ -171,17 +169,19 @@ function Library:CreateWindow(cfg)
         function Tab:CreateSection(title, side)
             local Parent = (side == "Right" and Right or Left)
             local Sec = Instance.new("Frame", Parent)
-            Sec.Size = UDim2.new(1, 0, 0, 35); Sec.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- ĐEN NHẠT
+            Sec.Size = UDim2.new(1, 0, 0, 35); Sec.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
             Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 8)
             local UIList = Instance.new("UIListLayout", Sec)
             UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = "Center"
             Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 35)
             Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
 
+            -- [ TITLE SECTION - CĂN GIỮA ]
             local SecTitle = Instance.new("TextLabel", Sec)
-            SecTitle.Size = UDim2.new(1, -20, 0, 30); SecTitle.Position = UDim2.new(0, 10, 0, -35)
+            SecTitle.Size = UDim2.new(1, 0, 0, 30); SecTitle.Position = UDim2.new(0, 0, 0, -35)
             SecTitle.Text = title:upper(); SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            SecTitle.BackgroundTransparency = 1; SecTitle.Font = "GothamBold"; SecTitle.TextSize = 11; SecTitle.TextXAlignment = 0
+            SecTitle.BackgroundTransparency = 1; SecTitle.Font = "GothamBold"; SecTitle.TextSize = 11
+            SecTitle.TextXAlignment = Enum.TextXAlignment.Center
 
             UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
                 Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 45)
@@ -194,13 +194,22 @@ function Library:CreateWindow(cfg)
                 Tgl.Size = UDim2.new(1, -16, 0, 32); Tgl.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
                 Tgl.Text = "   "..text; Tgl.TextColor3 = Color3.fromRGB(200, 200, 200); Tgl.TextXAlignment = 0; Tgl.Font = "Gotham"; Tgl.TextSize = 11
                 Instance.new("UICorner", Tgl)
+                
                 local State = false
                 local Box = Instance.new("Frame", Tgl)
                 Box.Size = UDim2.new(0, 16, 0, 16); Box.Position = UDim2.new(1, -26, 0.5, -8); Box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
                 Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
+                
+                -- [ HÌNH TRÒN TRONG TOGGLE ]
+                local Circle = Instance.new("Frame", Box)
+                Circle.Size = UDim2.new(0, 0, 0, 0); Circle.Position = UDim2.new(0.5, 0, 0.5, 0)
+                Circle.AnchorPoint = Vector2.new(0.5, 0.5); Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
+
                 Tgl.MouseButton1Click:Connect(function()
                     State = not State
                     TweenService:Create(Box, TweenInfo.new(0.2), {BackgroundColor3 = State and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(35, 35, 35)}):Play()
+                    TweenService:Create(Circle, TweenInfo.new(0.2), {Size = State and UDim2.new(0, 8, 0, 8) or UDim2.new(0, 0, 0, 0)}):Play()
                     cb(State)
                 end)
             end
