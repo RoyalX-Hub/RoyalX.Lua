@@ -22,10 +22,18 @@ end
 
 function Library:CreateWindow(cfg)
     local cfg = cfg or {}
-    if CoreGui:FindFirstChild("RoyalX_Hub") then CoreGui["RoyalX_Hub"]:Destroy() end
+    
+    -- Tự động tìm chỗ đặt UI an toàn nhất (Tránh CoreGui bị khóa)
+    local targetGui = CoreGui
+    if not pcall(function() local _ = CoreGui.Name end) then
+        targetGui = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    end
 
-    local ScreenGui = Instance.new("ScreenGui", CoreGui)
-    ScreenGui.Name = "RoyalX_Hub"; ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
+    if targetGui:FindFirstChild("RoyalX_Hub") then targetGui["RoyalX_Hub"]:Destroy() end
+
+    local ScreenGui = Instance.new("ScreenGui", targetGui)
+    ScreenGui.Name = "RoyalX_Hub"
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
     local LogoOpenBtn = Instance.new("ImageButton", ScreenGui)
     LogoOpenBtn.Size = UDim2.new(0, 50, 0, 50); LogoOpenBtn.Position = UDim2.new(0, 20, 0, 150)
@@ -37,7 +45,7 @@ function Library:CreateWindow(cfg)
     Main.AnchorPoint = Vector2.new(0.5, 0.5); Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
     Main.Visible = true; Main.ClipsDescendants = true; Instance.new("UICorner", Main); MakeDraggable(Main)
 
-    -- Fix Tab Bar: Cố định vị trí và Layer
+    -- Thanh Tab CỐ ĐỊNH TỌA ĐỘ
     local TabBar = Instance.new("Frame", Main)
     TabBar.Size = UDim2.new(1, -120, 0, 40); TabBar.Position = UDim2.new(0, 65, 0, 10)
     TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22); TabBar.ZIndex = 100; Instance.new("UICorner", TabBar)
@@ -46,11 +54,21 @@ function Library:CreateWindow(cfg)
     TabScroll.Size = UDim2.new(1, -10, 1, 0); TabScroll.Position = UDim2.new(0, 5, 0, 0)
     TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0; TabScroll.ZIndex = 101
     TabScroll.ScrollingDirection = Enum.ScrollingDirection.X
-    local TabList = Instance.new("UIListLayout", TabScroll); TabList.FillDirection = "Horizontal"; TabList.Padding = UDim.new(0, 8); TabList.VerticalAlignment = "Center"
+    -- ÉP CHIỀU RỘNG TAB DÀI GẤP ĐÔI (CHỐNG LÚN/CẮT TAB)
+    TabScroll.CanvasSize = UDim2.new(2, 0, 0, 0) 
+    
+    local TabList = Instance.new("UIListLayout", TabScroll)
+    TabList.FillDirection = "Horizontal"; TabList.Padding = UDim.new(0, 8); TabList.VerticalAlignment = "Center"
 
     local Container = Instance.new("Frame", Main)
     Container.Position = UDim2.new(0, 10, 0, 65); Container.Size = UDim2.new(1, -20, 1, -75)
     Container.BackgroundTransparency = 1; Container.ZIndex = 10
+
+    local CloseBtn = Instance.new("TextButton", Main)
+    CloseBtn.Size = UDim2.new(0, 35, 0, 35); CloseBtn.Position = UDim2.new(1, -45, 0, 12)
+    CloseBtn.Text = "×"; CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255); CloseBtn.BackgroundTransparency = 1; CloseBtn.TextSize = 30; CloseBtn.ZIndex = 200
+    CloseBtn.MouseButton1Click:Connect(function() Main.Visible = false; LogoOpenBtn.Visible = true end)
+    LogoOpenBtn.MouseButton1Click:Connect(function() Main.Visible = true; LogoOpenBtn.Visible = false end)
 
     local Window = { CurrentTab = nil }
 
@@ -61,7 +79,9 @@ function Library:CreateWindow(cfg)
 
         local Page = Instance.new("ScrollingFrame", Container)
         Page.Size = UDim2.new(1, 0, 1, 0); Page.BackgroundTransparency = 1; Page.Visible = false; Page.ScrollBarThickness = 0
-        Page.ScrollingDirection = Enum.ScrollingDirection.Y; Page.CanvasSize = UDim2.new(0, 0, 0, 0)
+        Page.ScrollingDirection = Enum.ScrollingDirection.Y
+        -- ÉP CHIỀU CAO CUỘN GẤP 5 LẦN (CHỐNG ẨN NỘI DUNG TUYỆT ĐỐI)
+        Page.CanvasSize = UDim2.new(0, 0, 5, 0)
 
         local Left = Instance.new("Frame", Page)
         Left.Size = UDim2.new(0.5, -7, 1, 0); Left.BackgroundTransparency = 1
@@ -70,16 +90,6 @@ function Library:CreateWindow(cfg)
         local Right = Instance.new("Frame", Page)
         Right.Size = UDim2.new(0.5, -7, 1, 0); Right.Position = UDim2.new(0.5, 7, 0, 0); Right.BackgroundTransparency = 1
         local RList = Instance.new("UIListLayout", Right); RList.Padding = UDim.new(0, 12)
-
-        -- Hàm tự cập nhật chiều cao nội dung
-        local function UpdatePageSize()
-            local LSize = LList.AbsoluteContentSize.Y
-            local RSize = RList.AbsoluteContentSize.Y
-            local MaxSize = math.max(LSize, RSize)
-            Page.CanvasSize = UDim2.new(0, 0, 0, MaxSize + 20)
-        end
-        LList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdatePageSize)
-        RList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdatePageSize)
 
         TBtn.MouseButton1Click:Connect(function()
             for _, v in pairs(Container:GetChildren()) do v.Visible = false end
@@ -92,16 +102,14 @@ function Library:CreateWindow(cfg)
             local Parent = (side == "Right" and Right or Left)
             local Sec = Instance.new("Frame", Parent)
             Sec.BackgroundColor3 = Color3.fromRGB(18, 18, 18); Instance.new("UICorner", Sec)
-            -- Ép Section tự nở dựa trên UIListLayout
-            Sec.Size = UDim2.new(1, 0, 0, 40) 
+            
+            -- BIẾN CỘNG DỒN CHIỀU CAO (THỦ CÔNG)
+            local secHeight = 45 -- 35 Top + 10 Bottom padding
+            Sec.Size = UDim2.new(1, 0, 0, secHeight)
             
             local SList = Instance.new("UIListLayout", Sec); SList.Padding = UDim.new(0, 8); SList.HorizontalAlignment = "Center"
             Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 35); Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
             
-            SList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                Sec.Size = UDim2.new(1, 0, 0, SList.AbsoluteContentSize.Y + 45)
-            end)
-
             local SecTitle = Instance.new("TextLabel", Sec)
             SecTitle.Size = UDim2.new(1, 0, 0, 30); SecTitle.Position = UDim2.new(0, 0, 0, -35)
             SecTitle.Text = title:upper(); SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255); SecTitle.BackgroundTransparency = 1; SecTitle.Font = "GothamBold"
@@ -110,10 +118,13 @@ function Library:CreateWindow(cfg)
             function Ele:AddToggle(text, cb)
                 local TglBtn = Instance.new("TextButton", Sec)
                 TglBtn.Size = UDim2.new(1, -16, 0, 35); TglBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 24); TglBtn.Text = "  "..text; TglBtn.TextColor3 = Color3.fromRGB(200,200,200); TglBtn.TextXAlignment = "Left"; Instance.new("UICorner", TglBtn)
+                
                 local Check = Instance.new("Frame", TglBtn)
                 Check.Size = UDim2.new(0, 22, 0, 22); Check.Position = UDim2.new(1, -30, 0.5, -11); Check.BackgroundColor3 = Color3.fromRGB(45, 45, 45); Instance.new("UICorner", Check).CornerRadius = UDim.new(1, 0)
+                
                 local Icon = Instance.new("ImageLabel", Check)
                 Icon.Size = UDim2.new(0, 0, 0, 0); Icon.Position = UDim2.new(0.5, 0, 0.5, 0); Icon.AnchorPoint = Vector2.new(0.5, 0.5); Icon.Image = "rbxassetid://11552553104"; Icon.BackgroundTransparency = 1
+                
                 local State = false
                 TglBtn.MouseButton1Click:Connect(function()
                     State = not State
@@ -121,11 +132,19 @@ function Library:CreateWindow(cfg)
                     Icon.Size = State and UDim2.new(0.7, 0, 0.7, 0) or UDim2.new(0, 0, 0, 0)
                     cb(State)
                 end)
+
+                -- CỘNG TAY KÍCH THƯỚC ĐỂ ÉP KHUNG NỞ RA
+                secHeight = secHeight + 35 + 8 -- Chiều cao nút (35) + khoảng cách padding (8)
+                Sec.Size = UDim2.new(1, 0, 0, secHeight)
             end
             
             function Ele:AddButton(text, cb)
                 local B = Instance.new("TextButton", Sec)
                 B.Size = UDim2.new(1, -16, 0, 32); B.BackgroundColor3 = Color3.fromRGB(30, 30, 30); B.Text = text; B.TextColor3 = Color3.fromRGB(255, 255, 255); Instance.new("UICorner", B); B.MouseButton1Click:Connect(cb)
+                
+                -- CỘNG TAY KÍCH THƯỚC ĐỂ ÉP KHUNG NỞ RA
+                secHeight = secHeight + 32 + 8
+                Sec.Size = UDim2.new(1, 0, 0, secHeight)
             end
             return Ele
         end
