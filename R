@@ -27,117 +27,105 @@ function Library:CreateWindow(cfg)
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "RoyalX_Hub"; ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
 
-    -- Nút mở Menu
     local LogoOpenBtn = Instance.new("ImageButton", ScreenGui)
     LogoOpenBtn.Size = UDim2.new(0, 50, 0, 50); LogoOpenBtn.Position = UDim2.new(0, 20, 0, 150)
     LogoOpenBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); LogoOpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
     LogoOpenBtn.Visible = false; LogoOpenBtn.ZIndex = 2000; Instance.new("UICorner", LogoOpenBtn); MakeDraggable(LogoOpenBtn)
 
-    -- Khung chính
     local Main = Instance.new("Frame", ScreenGui)
     Main.Size = UDim2.new(0, 580, 0, 380); Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5); Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-    Main.ZIndex = 10; Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10); MakeDraggable(Main)
+    Main.Visible = true; Main.ClipsDescendants = true; Instance.new("UICorner", Main); MakeDraggable(Main)
 
-    -- Logo góc trái
-    local InnerLogo = Instance.new("ImageLabel", Main)
-    InnerLogo.Size = UDim2.new(0, 45, 0, 45); InnerLogo.Position = UDim2.new(0, 10, 0, 8)
-    InnerLogo.BackgroundTransparency = 1; InnerLogo.Image = "rbxassetid://"..(cfg.Logo or "107831103893115"); InnerLogo.ZIndex = 100
-
-    -- Thanh Tab (Fix lún: Dùng Frame cố định vị trí tuyệt đối)
+    -- Fix Tab Bar: Cố định vị trí và Layer
     local TabBar = Instance.new("Frame", Main)
-    TabBar.Size = UDim2.new(1, -115, 0, 40); TabBar.Position = UDim2.new(0, 65, 0, 10)
-    TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22); TabBar.ZIndex = 20; Instance.new("UICorner", TabBar)
+    TabBar.Size = UDim2.new(1, -120, 0, 40); TabBar.Position = UDim2.new(0, 65, 0, 10)
+    TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22); TabBar.ZIndex = 100; Instance.new("UICorner", TabBar)
 
     local TabScroll = Instance.new("ScrollingFrame", TabBar)
     TabScroll.Size = UDim2.new(1, -10, 1, 0); TabScroll.Position = UDim2.new(0, 5, 0, 0)
-    TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0; TabScroll.ZIndex = 21
-    TabScroll.ScrollingDirection = Enum.ScrollingDirection.X; TabScroll.AutomaticCanvasSize = "X"
+    TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0; TabScroll.ZIndex = 101
+    TabScroll.ScrollingDirection = Enum.ScrollingDirection.X
     local TabList = Instance.new("UIListLayout", TabScroll); TabList.FillDirection = "Horizontal"; TabList.Padding = UDim.new(0, 8); TabList.VerticalAlignment = "Center"
 
-    -- Nút đóng X
-    local CloseBtn = Instance.new("TextButton", Main)
-    CloseBtn.Size = UDim2.new(0, 35, 0, 35); CloseBtn.Position = UDim2.new(1, -42, 0, 12)
-    CloseBtn.Text = "×"; CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255); CloseBtn.BackgroundTransparency = 1; CloseBtn.TextSize = 30; CloseBtn.ZIndex = 30
-    CloseBtn.MouseButton1Click:Connect(function() Main.Visible = false; LogoOpenBtn.Visible = true end)
-    LogoOpenBtn.MouseButton1Click:Connect(function() Main.Visible = true; LogoOpenBtn.Visible = false end)
-
-    -- Vùng chứa nội dung (Container)
     local Container = Instance.new("Frame", Main)
     Container.Position = UDim2.new(0, 10, 0, 65); Container.Size = UDim2.new(1, -20, 1, -75)
-    Container.BackgroundTransparency = 1; Container.ZIndex = 15; Container.ClipsDescendants = true
+    Container.BackgroundTransparency = 1; Container.ZIndex = 10
 
     local Window = { CurrentTab = nil }
 
     function Window:CreateTab(name)
         local TBtn = Instance.new("TextButton", TabScroll)
         TBtn.Size = UDim2.new(0, 95, 0, 30); TBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-        TBtn.Text = name; TBtn.TextColor3 = Color3.fromRGB(255, 255, 255); TBtn.Font = "GothamBold"; TBtn.ZIndex = 25; Instance.new("UICorner", TBtn)
+        TBtn.Text = name; TBtn.TextColor3 = Color3.fromRGB(255, 255, 255); TBtn.Font = "GothamBold"; Instance.new("UICorner", TBtn)
 
         local Page = Instance.new("ScrollingFrame", Container)
-        Page.Size = UDim2.new(1, 0, 1, 0); Page.BackgroundTransparency = 1; Page.Visible = false; Page.ScrollBarThickness = 0; Page.ZIndex = 16
-        Page.ScrollingDirection = Enum.ScrollingDirection.Y
-        -- FIX GIỚI HẠN VUỐT: Chỉ cuộn khi nội dung vượt quá khung
-        Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        Page.CanvasSize = UDim2.new(0, 0, 0, 0) 
+        Page.Size = UDim2.new(1, 0, 1, 0); Page.BackgroundTransparency = 1; Page.Visible = false; Page.ScrollBarThickness = 0
+        Page.ScrollingDirection = Enum.ScrollingDirection.Y; Page.CanvasSize = UDim2.new(0, 0, 0, 0)
 
         local Left = Instance.new("Frame", Page)
-        Left.Size = UDim2.new(0.5, -7, 0, 0); Left.BackgroundTransparency = 1; Left.AutomaticSize = "Y"
-        Instance.new("UIListLayout", Left).Padding = UDim.new(0, 12)
+        Left.Size = UDim2.new(0.5, -7, 1, 0); Left.BackgroundTransparency = 1
+        local LList = Instance.new("UIListLayout", Left); LList.Padding = UDim.new(0, 12)
 
         local Right = Instance.new("Frame", Page)
-        Right.Size = UDim2.new(0.5, -7, 0, 0); Right.Position = UDim2.new(0.5, 7, 0, 0); Right.BackgroundTransparency = 1; Right.AutomaticSize = "Y"
-        Instance.new("UIListLayout", Right).Padding = UDim.new(0, 12)
+        Right.Size = UDim2.new(0.5, -7, 1, 0); Right.Position = UDim2.new(0.5, 7, 0, 0); Right.BackgroundTransparency = 1
+        local RList = Instance.new("UIListLayout", Right); RList.Padding = UDim.new(0, 12)
+
+        -- Hàm tự cập nhật chiều cao nội dung
+        local function UpdatePageSize()
+            local LSize = LList.AbsoluteContentSize.Y
+            local RSize = RList.AbsoluteContentSize.Y
+            local MaxSize = math.max(LSize, RSize)
+            Page.CanvasSize = UDim2.new(0, 0, 0, MaxSize + 20)
+        end
+        LList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdatePageSize)
+        RList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(UpdatePageSize)
 
         TBtn.MouseButton1Click:Connect(function()
-            for _, v in pairs(Container:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
+            for _, v in pairs(Container:GetChildren()) do v.Visible = false end
             Page.Visible = true; Window.CurrentTab = Page
         end)
-
         if not Window.CurrentTab then Page.Visible = true; Window.CurrentTab = Page end
 
         local Tab = {}
         function Tab:CreateSection(title, side)
             local Parent = (side == "Right" and Right or Left)
             local Sec = Instance.new("Frame", Parent)
-            Sec.BackgroundColor3 = Color3.fromRGB(18, 18, 18); Sec.Size = UDim2.new(1, 0, 0, 40)
-            Sec.AutomaticSize = "Y"; Instance.new("UICorner", Sec)
-
-            local UIList = Instance.new("UIListLayout", Sec); UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = "Center"
+            Sec.BackgroundColor3 = Color3.fromRGB(18, 18, 18); Instance.new("UICorner", Sec)
+            -- Ép Section tự nở dựa trên UIListLayout
+            Sec.Size = UDim2.new(1, 0, 0, 40) 
+            
+            local SList = Instance.new("UIListLayout", Sec); SList.Padding = UDim.new(0, 8); SList.HorizontalAlignment = "Center"
             Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 35); Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
             
+            SList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                Sec.Size = UDim2.new(1, 0, 0, SList.AbsoluteContentSize.Y + 45)
+            end)
+
             local SecTitle = Instance.new("TextLabel", Sec)
             SecTitle.Size = UDim2.new(1, 0, 0, 30); SecTitle.Position = UDim2.new(0, 0, 0, -35)
-            SecTitle.Text = title:upper(); SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-            SecTitle.BackgroundTransparency = 1; SecTitle.Font = "GothamBold"; SecTitle.TextSize = 11
+            SecTitle.Text = title:upper(); SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255); SecTitle.BackgroundTransparency = 1; SecTitle.Font = "GothamBold"
 
             local Ele = {}
             function Ele:AddToggle(text, cb)
                 local TglBtn = Instance.new("TextButton", Sec)
-                TglBtn.Size = UDim2.new(1, -16, 0, 35); TglBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
-                TglBtn.Text = "  " .. text; TglBtn.TextColor3 = Color3.fromRGB(200, 200, 200); TglBtn.TextXAlignment = "Left"; Instance.new("UICorner", TglBtn)
-                
-                local CheckFrame = Instance.new("Frame", TglBtn)
-                CheckFrame.Size = UDim2.new(0, 22, 0, 22); CheckFrame.Position = UDim2.new(1, -30, 0.5, -11)
-                CheckFrame.BackgroundColor3 = Color3.fromRGB(45, 45, 45); Instance.new("UICorner", CheckFrame).CornerRadius = UDim.new(1, 0)
-                
-                local CheckIcon = Instance.new("ImageLabel", CheckFrame)
-                CheckIcon.Size = UDim2.new(0, 0, 0, 0); CheckIcon.Position = UDim2.new(0.5, 0, 0.5, 0); CheckIcon.AnchorPoint = Vector2.new(0.5, 0.5)
-                CheckIcon.Image = "rbxassetid://11552553104"; CheckIcon.BackgroundTransparency = 1
-
+                TglBtn.Size = UDim2.new(1, -16, 0, 35); TglBtn.BackgroundColor3 = Color3.fromRGB(24, 24, 24); TglBtn.Text = "  "..text; TglBtn.TextColor3 = Color3.fromRGB(200,200,200); TglBtn.TextXAlignment = "Left"; Instance.new("UICorner", TglBtn)
+                local Check = Instance.new("Frame", TglBtn)
+                Check.Size = UDim2.new(0, 22, 0, 22); Check.Position = UDim2.new(1, -30, 0.5, -11); Check.BackgroundColor3 = Color3.fromRGB(45, 45, 45); Instance.new("UICorner", Check).CornerRadius = UDim.new(1, 0)
+                local Icon = Instance.new("ImageLabel", Check)
+                Icon.Size = UDim2.new(0, 0, 0, 0); Icon.Position = UDim2.new(0.5, 0, 0.5, 0); Icon.AnchorPoint = Vector2.new(0.5, 0.5); Icon.Image = "rbxassetid://11552553104"; Icon.BackgroundTransparency = 1
                 local State = false
                 TglBtn.MouseButton1Click:Connect(function()
                     State = not State
-                    CheckFrame.BackgroundColor3 = State and Color3.fromRGB(0, 190, 255) or Color3.fromRGB(45, 45, 45)
-                    CheckIcon.Size = State and UDim2.new(0.7, 0, 0.7, 0) or UDim2.new(0, 0, 0, 0)
+                    Check.BackgroundColor3 = State and Color3.fromRGB(0, 190, 255) or Color3.fromRGB(45, 45, 45)
+                    Icon.Size = State and UDim2.new(0.7, 0, 0.7, 0) or UDim2.new(0, 0, 0, 0)
                     cb(State)
                 end)
             end
             
             function Ele:AddButton(text, cb)
                 local B = Instance.new("TextButton", Sec)
-                B.Size = UDim2.new(1, -16, 0, 32); B.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-                B.Text = text; B.TextColor3 = Color3.fromRGB(255, 255, 255); Instance.new("UICorner", B); B.MouseButton1Click:Connect(cb)
+                B.Size = UDim2.new(1, -16, 0, 32); B.BackgroundColor3 = Color3.fromRGB(30, 30, 30); B.Text = text; B.TextColor3 = Color3.fromRGB(255, 255, 255); Instance.new("UICorner", B); B.MouseButton1Click:Connect(cb)
             end
             return Ele
         end
