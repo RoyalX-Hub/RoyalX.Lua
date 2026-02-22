@@ -36,6 +36,8 @@ function Library:CreateWindow(cfg)
     LogoOpenBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     LogoOpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
     LogoOpenBtn.Visible = false 
+    LogoOpenBtn.BackgroundTransparency = 1
+    LogoOpenBtn.ImageTransparency = 1
     Instance.new("UICorner", LogoOpenBtn).CornerRadius = UDim.new(0, 12)
     MakeDraggable(LogoOpenBtn)
 
@@ -44,14 +46,14 @@ function Library:CreateWindow(cfg)
     Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
     Main.Position = UDim2.new(0.5, 0, 0.5, 0)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
-    Main.Size = UDim2.new(0, 600, 0, 400) -- Tăng nhẹ kích thước để thoáng hơn
+    Main.Size = UDim2.new(0, 600, 0, 400)
     Main.ClipsDescendants = true
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
     MakeDraggable(Main)
 
     -- [ LOGO BÊN TRONG UI ]
     local InnerLogo = Instance.new("ImageLabel", Main)
-    InnerLogo.Size = UDim2.new(0, 45, 0, 45) -- Kích thước logo trong UI
+    InnerLogo.Size = UDim2.new(0, 45, 0, 45)
     InnerLogo.Position = UDim2.new(0, 10, 0, 8)
     InnerLogo.BackgroundTransparency = 1
     InnerLogo.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
@@ -59,7 +61,7 @@ function Library:CreateWindow(cfg)
 
     -- [ THANH TAB BAR ]
     local TabBar = Instance.new("Frame", Main)
-    TabBar.Size = UDim2.new(1, -75, 0, 40) -- Thu hẹp lại để nhường chỗ cho logo
+    TabBar.Size = UDim2.new(1, -75, 0, 40)
     TabBar.Position = UDim2.new(0, 65, 0, 10)
     TabBar.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
     Instance.new("UICorner", TabBar)
@@ -76,9 +78,29 @@ function Library:CreateWindow(cfg)
     CloseBtn.Size = UDim2.new(0, 35, 1, 0); CloseBtn.Position = UDim2.new(1, -35, 0, 0)
     CloseBtn.Text = "×"; CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80); CloseBtn.BackgroundTransparency = 1; CloseBtn.TextSize = 24; CloseBtn.Font = "GothamBold"
 
+    -- [ ANIMATION BẬT/TẮT MENU ]
+    local IsOpened = true
     local function ToggleUI()
-        Main.Visible = not Main.Visible
-        LogoOpenBtn.Visible = not Main.Visible
+        IsOpened = not IsOpened
+        if IsOpened then
+            -- Mở Menu
+            Main.Visible = true
+            TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 400)}):Play()
+            TweenService:Create(Main, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+            
+            -- Ẩn Logo Button
+            TweenService:Create(LogoOpenBtn, TweenInfo.new(0.3), {ImageTransparency = 1, BackgroundTransparency = 1}):Play()
+            task.delay(0.3, function() if IsOpened then LogoOpenBtn.Visible = false end end)
+        else
+            -- Đóng Menu
+            TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+            TweenService:Create(Main, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+            
+            -- Hiện Logo Button
+            LogoOpenBtn.Visible = true
+            TweenService:Create(LogoOpenBtn, TweenInfo.new(0.4, Enum.EasingStyle.Elastic, Enum.EasingDirection.Out), {ImageTransparency = 0, BackgroundTransparency = 0}):Play()
+            task.delay(0.4, function() if not IsOpened then Main.Visible = false end end)
+        end
     end
     CloseBtn.MouseButton1Click:Connect(ToggleUI)
     LogoOpenBtn.MouseButton1Click:Connect(ToggleUI)
@@ -96,6 +118,7 @@ function Library:CreateWindow(cfg)
 
         local Page = Instance.new("Frame", Container)
         Page.Size = UDim2.new(1, 0, 1, 0); Page.Visible = false; Page.BackgroundTransparency = 1
+        Page.Position = UDim2.new(0, 50, 0, 0) -- Vị trí bắt đầu cho animation
 
         local function CreateCol(pos)
             local SF = Instance.new("ScrollingFrame", Page)
@@ -106,12 +129,34 @@ function Library:CreateWindow(cfg)
         local Left = CreateCol(UDim2.new(0,0,0,0))
         local Right = CreateCol(UDim2.new(0.5,7,0,0))
 
+        -- [ ANIMATION CHUYỂN TAB ]
         TBtn.MouseButton1Click:Connect(function()
-            if Window.CurrentTab then Window.CurrentTab.P.Visible = false; Window.CurrentTab.B.BackgroundColor3 = Color3.fromRGB(30, 30, 30) end
-            Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-            Window.CurrentTab = {P = Page, B = TBtn}
+            if Window.CurrentTab and Window.CurrentTab.B ~= TBtn then
+                -- Ẩn Tab cũ
+                local OldPage = Window.CurrentTab.P
+                local OldBtn = Window.CurrentTab.B
+                TweenService:Create(OldBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(30, 30, 30), TextColor3 = Color3.fromRGB(180, 180, 180)}):Play()
+                TweenService:Create(OldPage, TweenInfo.new(0.3), {Position = UDim2.new(0, -50, 0, 0), BackgroundTransparency = 1}):Play()
+                task.delay(0.3, function() OldPage.Visible = false end)
+
+                -- Hiện Tab mới
+                Page.Visible = true
+                Page.Position = UDim2.new(0, 50, 0, 0)
+                Page.BackgroundTransparency = 1
+                TweenService:Create(TBtn, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(55, 55, 55), TextColor3 = Color3.fromRGB(255, 255, 255)}):Play()
+                TweenService:Create(Page, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Position = UDim2.new(0, 0, 0, 0), BackgroundTransparency = 0}):Play()
+                
+                Window.CurrentTab = {P = Page, B = TBtn}
+            end
         end)
-        if not Window.CurrentTab then Page.Visible = true; TBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 55); Window.CurrentTab = {P = Page, B = TBtn} end
+
+        if not Window.CurrentTab then 
+            Page.Visible = true; 
+            Page.Position = UDim2.new(0, 0, 0, 0)
+            TBtn.BackgroundColor3 = Color3.fromRGB(55, 55, 55); 
+            TBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Window.CurrentTab = {P = Page, B = TBtn} 
+        end
 
         local Tab = {}
 
@@ -129,7 +174,7 @@ function Library:CreateWindow(cfg)
 
             local SecTitle = Instance.new("TextLabel", Sec)
             SecTitle.Size = UDim2.new(1, -20, 0, 30)
-            SecTitle.Position = UDim2.new(0, 10, 0, -35) -- Đẩy chữ lên đầu cột
+            SecTitle.Position = UDim2.new(0, 10, 0, -35)
             SecTitle.Text = title:upper()
             SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
             SecTitle.BackgroundTransparency = 1
@@ -197,6 +242,32 @@ function Library:CreateWindow(cfg)
                         cb(v)
                     end)
                 end
+            end
+
+            -- [ PRACTICE TRONG MENU ]
+            function Ele:AddPractice(text, cb)
+                local Prac = Instance.new("Frame", Sec)
+                Prac.Size = UDim2.new(1, -16, 0, 45); Prac.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+                Instance.new("UICorner", Prac)
+
+                local Title = Instance.new("TextLabel", Prac)
+                Title.Size = UDim2.new(1, -100, 1, 0); Title.Position = UDim2.new(0, 10, 0, 0)
+                Title.BackgroundTransparency = 1; Title.Text = text; Title.TextColor3 = Color3.fromRGB(200, 200, 200)
+                Title.Font = "Gotham"; Title.TextSize = 11; Title.TextXAlignment = 0
+
+                local StartBtn = Instance.new("TextButton", Prac)
+                StartBtn.Size = UDim2.new(0, 80, 0, 25); StartBtn.Position = UDim2.new(1, -90, 0.5, -12.5)
+                StartBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255); StartBtn.Text = "Practice"
+                StartBtn.TextColor3 = Color3.fromRGB(255, 255, 255); StartBtn.Font = "GothamBold"; StartBtn.TextSize = 10
+                Instance.new("UICorner", StartBtn)
+
+                StartBtn.MouseButton1Click:Connect(function()
+                    -- Hiệu ứng nhấn nút
+                    TweenService:Create(StartBtn, TweenInfo.new(0.1), {Size = UDim2.new(0, 75, 0, 22)}):Play()
+                    task.wait(0.1)
+                    TweenService:Create(StartBtn, TweenInfo.new(0.1), {Size = UDim2.new(0, 80, 0, 25)}):Play()
+                    cb()
+                end)
             end
 
             return Ele
