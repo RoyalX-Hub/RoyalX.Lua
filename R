@@ -29,32 +29,17 @@ function Library:CreateWindow(cfg)
     ScreenGui.Name = "RoyalX_Hub"
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- [ INTRO ANIMATION ]
-    local IntroFrame = Instance.new("Frame", ScreenGui)
-    IntroFrame.Size = UDim2.new(1, 0, 1, 0)
-    IntroFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    IntroFrame.ZIndex = 1000
-
-    local IntroText = Instance.new("TextLabel", IntroFrame)
-    IntroText.Size = UDim2.new(1, 0, 0, 50)
-    IntroText.Position = UDim2.new(0, 0, 0.5, 0)
-    IntroText.AnchorPoint = Vector2.new(0, 0.5)
-    IntroText.BackgroundTransparency = 1
-    IntroText.Text = ""
-    IntroText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    IntroText.Font = "GothamBold"
-    IntroText.TextSize = 40
-    IntroText.TextStrokeTransparency = 1
-    IntroText.TextStrokeColor3 = Color3.fromRGB(0, 170, 255)
-
-    local IntroLogo = Instance.new("ImageLabel", IntroFrame)
-    IntroLogo.Size = UDim2.new(0, 100, 0, 100)
-    IntroLogo.Position = UDim2.new(0.5, 0, -0.2, 0)
-    IntroLogo.AnchorPoint = Vector2.new(0.5, 0.5)
-    IntroLogo.BackgroundTransparency = 1
-    IntroLogo.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
-    IntroLogo.ImageTransparency = 1
-    Instance.new("UICorner", IntroLogo).CornerRadius = UDim.new(1, 0)
+    -- [ NÚT LOGO MỞ KHI ĐÓNG MENU ]
+    local LogoOpenBtn = Instance.new("ImageButton", ScreenGui)
+    LogoOpenBtn.Size = UDim2.new(0, 60, 0, 60)
+    LogoOpenBtn.Position = UDim2.new(0, 50, 0, 150)
+    LogoOpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    LogoOpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
+    LogoOpenBtn.Visible = false 
+    LogoOpenBtn.BackgroundTransparency = 1
+    LogoOpenBtn.ImageTransparency = 1
+    Instance.new("UICorner", LogoOpenBtn).CornerRadius = UDim.new(0, 12)
+    MakeDraggable(LogoOpenBtn)
 
     -- [ KHUNG CHÍNH ]
     local Main = Instance.new("Frame", ScreenGui)
@@ -63,34 +48,63 @@ function Library:CreateWindow(cfg)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Size = UDim2.new(0, 600, 0, 400)
     Main.ClipsDescendants = true
-    Main.Visible = false 
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
     MakeDraggable(Main)
 
-    -- [ CHẠY INTRO ANIMATION ]
-    task.spawn(function()
-        local fullText = "Royalx Hub"
-        for i = 1, #fullText do
-            IntroText.Text = string.sub(fullText, 1, i)
-            task.wait(0.1)
+    -- [ LOGO BÊN TRONG UI ]
+    local InnerLogo = Instance.new("ImageLabel", Main)
+    InnerLogo.Size = UDim2.new(0, 45, 0, 45)
+    InnerLogo.Position = UDim2.new(0, 10, 0, 8)
+    InnerLogo.BackgroundTransparency = 1
+    InnerLogo.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
+    Instance.new("UICorner", InnerLogo).CornerRadius = UDim.new(0, 8)
+
+    -- [ THANH TAB BAR ]
+    local TabBar = Instance.new("Frame", Main)
+    TabBar.Size = UDim2.new(1, -75, 0, 40)
+    TabBar.Position = UDim2.new(0, 65, 0, 10)
+    TabBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    Instance.new("UICorner", TabBar)
+
+    local TabScroll = Instance.new("ScrollingFrame", TabBar)
+    TabScroll.Size = UDim2.new(1, -50, 1, 0)
+    TabScroll.Position = UDim2.new(0, 10, 0, 0)
+    TabScroll.BackgroundTransparency = 1; TabScroll.ScrollBarThickness = 0
+    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0); TabScroll.AutomaticCanvasSize = "X"
+    local TabList = Instance.new("UIListLayout", TabScroll)
+    TabList.FillDirection = "Horizontal"; TabList.Padding = UDim.new(0, 8); TabList.VerticalAlignment = "Center"
+
+    -- [ NÚT ĐÓNG (X) - ĐÃ FIX KHÔNG HIỆN ]
+    local CloseBtn = Instance.new("TextButton", TabBar)
+    CloseBtn.Size = UDim2.new(0, 35, 1, 0)
+    CloseBtn.Position = UDim2.new(1, -35, 0, 0)
+    CloseBtn.Text = "×"
+    CloseBtn.TextColor3 = Color3.fromRGB(255, 80, 80)
+    CloseBtn.BackgroundTransparency = 1
+    CloseBtn.TextSize = 35
+    CloseBtn.Font = "GothamBold"
+    CloseBtn.ZIndex = 100 -- Đảm bảo luôn ở trên cùng
+
+    -- [ ANIMATION BẬT/TẮT MENU ]
+    local IsOpened = true
+    local function ToggleUI()
+        IsOpened = not IsOpened
+        if IsOpened then
+            Main.Visible = true
+            Main:TweenSize(UDim2.new(0, 600, 0, 400), "Out", "Back", 0.4, true)
+            TweenService:Create(Main, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+            TweenService:Create(LogoOpenBtn, TweenInfo.new(0.3), {ImageTransparency = 1, BackgroundTransparency = 1}):Play()
+            task.delay(0.3, function() if IsOpened then LogoOpenBtn.Visible = false end end)
+        else
+            Main:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.4, true)
+            TweenService:Create(Main, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+            LogoOpenBtn.Visible = true
+            TweenService:Create(LogoOpenBtn, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {ImageTransparency = 0, BackgroundTransparency = 0}):Play()
+            task.delay(0.4, function() if not IsOpened then Main.Visible = false end end)
         end
-        
-        TweenService:Create(IntroText, TweenInfo.new(0.5), {TextStrokeTransparency = 0}):Play()
-        task.wait(0.5)
-        
-        IntroLogo.ImageTransparency = 0
-        IntroLogo:TweenPosition(UDim2.new(0.5, 0, 0.35, 0), "Out", "Bounce", 0.8, true)
-        task.wait(1)
-        
-        TweenService:Create(IntroFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(IntroText, TweenInfo.new(0.5), {TextTransparency = 1, TextStrokeTransparency = 1}):Play()
-        TweenService:Create(IntroLogo, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
-        
-        task.wait(0.5)
-        IntroFrame:Destroy()
-        Main.Visible = true
-        Main:TweenSize(UDim2.new(0, 600, 0, 400), "Out", "Back", 0.4, true)
-    end)
+    end
+    CloseBtn.MouseButton1Click:Connect(ToggleUI)
+    LogoOpenBtn.MouseButton1Click:Connect(ToggleUI)
 
     -- ... (Các phần còn lại của thư viện giữ nguyên)
     return Window
