@@ -29,95 +29,17 @@ function Library:CreateWindow(cfg)
     ScreenGui.Name = "RoyalX_Hub"
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- [ HỆ THỐNG ÂM THANH ]
-    local function CreateSound(id, volume)
-        local sound = Instance.new("Sound", ScreenGui)
-        sound.SoundId = "rbxassetid://"..id
-        sound.Volume = volume or 1
-        return sound
-    end
-
-    -- IDs âm thanh chất lượng cao
-    local DoneSound = CreateSound("4590662766", 1.5) -- Âm thanh Done Loading
-    local ToggleSound = CreateSound("12222242", 0.8) -- Âm thanh Toggle/Click
-
-    -- [ LOADING SCREEN ]
-    local LoadingFrame = Instance.new("Frame", ScreenGui)
-    LoadingFrame.Size = UDim2.new(1, 0, 1, 0)
-    LoadingFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    LoadingFrame.ZIndex = 2000
-
-    local LoadingCircle = Instance.new("Frame", LoadingFrame)
-    LoadingCircle.Size = UDim2.new(0, 100, 0, 100)
-    LoadingCircle.Position = UDim2.new(0.5, 0, 0.45, 0)
-    LoadingCircle.AnchorPoint = Vector2.new(0.5, 0.5)
-    LoadingCircle.BackgroundTransparency = 1
-    
-    local CircleStroke = Instance.new("UIStroke", LoadingCircle)
-    CircleStroke.Thickness = 4
-    CircleStroke.Color = Color3.fromRGB(0, 170, 255)
-    CircleStroke.Transparency = 0.5
-    Instance.new("UICorner", LoadingCircle).CornerRadius = UDim.new(1, 0)
-
-    local PercentText = Instance.new("TextLabel", LoadingFrame)
-    PercentText.Size = UDim2.new(0, 100, 0, 100)
-    PercentText.Position = UDim2.new(0.5, 0, 0.45, 0)
-    PercentText.AnchorPoint = Vector2.new(0.5, 0.5)
-    PercentText.BackgroundTransparency = 1
-    PercentText.Text = "0%"
-    PercentText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    PercentText.Font = "GothamBold"
-    PercentText.TextSize = 20
-
-    local LoadingTitle = Instance.new("TextLabel", LoadingFrame)
-    LoadingTitle.Size = UDim2.new(1, 0, 0, 50)
-    LoadingTitle.Position = UDim2.new(0, 0, 0.6, 0)
-    LoadingTitle.BackgroundTransparency = 1
-    LoadingTitle.Text = "RoyalX Hub"
-    LoadingTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-    LoadingTitle.Font = "GothamBold"
-    LoadingTitle.TextSize = 35
-    LoadingTitle.TextTransparency = 1
-
-    -- [ THÔNG BÁO DONE ]
-    local function ShowNotification()
-        DoneSound:Play()
-        local Notif = Instance.new("Frame", ScreenGui)
-        Notif.Size = UDim2.new(0, 280, 0, 65)
-        Notif.Position = UDim2.new(1, 300, 1, -80)
-        Notif.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-        Notif.ZIndex = 3000
-        Instance.new("UICorner", Notif).CornerRadius = UDim.new(0, 10)
-        Instance.new("UIStroke", Notif).Color = Color3.fromRGB(40, 40, 40)
-
-        local NotifLogo = Instance.new("ImageLabel", Notif)
-        NotifLogo.Size = UDim2.new(0, 45, 0, 45)
-        NotifLogo.Position = UDim2.new(0, 10, 0.5, -22.5)
-        NotifLogo.BackgroundTransparency = 1
-        NotifLogo.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
-        Instance.new("UICorner", NotifLogo).CornerRadius = UDim.new(0, 8)
-
-        local NotifTitle = Instance.new("TextLabel", Notif)
-        NotifTitle.Size = UDim2.new(1, -70, 0, 20)
-        NotifTitle.Position = UDim2.new(0, 65, 0, 12)
-        NotifTitle.BackgroundTransparency = 1
-        NotifTitle.Text = "RoyalX Hub"
-        NotifTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-        NotifTitle.Font = "GothamBold"; NotifTitle.TextSize = 14; NotifTitle.TextXAlignment = 0
-
-        local NotifDesc = Instance.new("TextLabel", Notif)
-        NotifDesc.Size = UDim2.new(1, -70, 0, 20)
-        NotifDesc.Position = UDim2.new(0, 65, 0, 32)
-        NotifDesc.BackgroundTransparency = 1
-        NotifDesc.Text = "Loaded Successfully!"
-        NotifDesc.TextColor3 = Color3.fromRGB(180, 180, 180)
-        NotifDesc.Font = "Gotham"; NotifDesc.TextSize = 12; NotifDesc.TextXAlignment = 0
-
-        Notif:TweenPosition(UDim2.new(1, -300, 1, -80), "Out", "Quart", 0.5, true)
-        task.wait(3)
-        Notif:TweenPosition(UDim2.new(1, 300, 1, -80), "In", "Quart", 0.5, true)
-        task.delay(0.5, function() Notif:Destroy() end)
-    end
+    -- [ NÚT LOGO MỞ KHI ĐÓNG MENU ]
+    local LogoOpenBtn = Instance.new("ImageButton", ScreenGui)
+    LogoOpenBtn.Size = UDim2.new(0, 60, 0, 60)
+    LogoOpenBtn.Position = UDim2.new(0, 50, 0, 150)
+    LogoOpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    LogoOpenBtn.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
+    LogoOpenBtn.Visible = false 
+    LogoOpenBtn.BackgroundTransparency = 1
+    LogoOpenBtn.ImageTransparency = 1
+    Instance.new("UICorner", LogoOpenBtn).CornerRadius = UDim.new(0, 12)
+    MakeDraggable(LogoOpenBtn)
 
     -- [ KHUNG CHÍNH ]
     local Main = Instance.new("Frame", ScreenGui)
@@ -126,9 +48,16 @@ function Library:CreateWindow(cfg)
     Main.AnchorPoint = Vector2.new(0.5, 0.5)
     Main.Size = UDim2.new(0, 600, 0, 400)
     Main.ClipsDescendants = true
-    Main.Visible = false
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
     MakeDraggable(Main)
+
+    -- [ LOGO BÊN TRONG UI ]
+    local InnerLogo = Instance.new("ImageLabel", Main)
+    InnerLogo.Size = UDim2.new(0, 45, 0, 45)
+    InnerLogo.Position = UDim2.new(0, 10, 0, 8)
+    InnerLogo.BackgroundTransparency = 1
+    InnerLogo.Image = "rbxassetid://"..(cfg.Logo or "107831103893115")
+    Instance.new("UICorner", InnerLogo).CornerRadius = UDim.new(0, 8)
 
     -- [ THANH TAB BAR ]
     local TabBar = Instance.new("Frame", Main)
@@ -160,34 +89,22 @@ function Library:CreateWindow(cfg)
     local IsOpened = true
     local function ToggleUI()
         IsOpened = not IsOpened
-        ToggleSound:Play()
         if IsOpened then
             Main.Visible = true
             Main:TweenSize(UDim2.new(0, 600, 0, 400), "Out", "Back", 0.4, true)
+            TweenService:Create(Main, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
+            TweenService:Create(LogoOpenBtn, TweenInfo.new(0.3), {ImageTransparency = 1, BackgroundTransparency = 1}):Play()
+            task.delay(0.3, function() if IsOpened then LogoOpenBtn.Visible = false end end)
         else
             Main:TweenSize(UDim2.new(0, 0, 0, 0), "In", "Back", 0.4, true)
+            TweenService:Create(Main, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play()
+            LogoOpenBtn.Visible = true
+            TweenService:Create(LogoOpenBtn, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {ImageTransparency = 0, BackgroundTransparency = 0}):Play()
             task.delay(0.4, function() if not IsOpened then Main.Visible = false end end)
         end
     end
     CloseBtn.MouseButton1Click:Connect(ToggleUI)
-
-    -- [ CHẠY LOADING ANIMATION ]
-    task.spawn(function()
-        for i = 1, 100 do
-            PercentText.Text = i.."%"
-            task.wait(0.02)
-        end
-        TweenService:Create(LoadingTitle, TweenInfo.new(0.5), {TextTransparency = 0}):Play()
-        task.wait(0.8)
-        TweenService:Create(LoadingFrame, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
-        TweenService:Create(PercentText, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        TweenService:Create(LoadingTitle, TweenInfo.new(0.5), {TextTransparency = 1}):Play()
-        task.wait(0.5)
-        LoadingFrame:Destroy()
-        Main.Visible = true
-        Main:TweenSize(UDim2.new(0, 600, 0, 400), "Out", "Back", 0.4, true)
-        task.spawn(ShowNotification)
-    end)
+    LogoOpenBtn.MouseButton1Click:Connect(ToggleUI)
 
     local Container = Instance.new("Frame", Main)
     Container.Position = UDim2.new(0, 10, 0, 65); Container.Size = UDim2.new(1, -20, 1, -75); Container.BackgroundTransparency = 1
@@ -202,16 +119,41 @@ function Library:CreateWindow(cfg)
 
         local Page = Instance.new("Frame", Container)
         Page.Size = UDim2.new(1, 0, 1, 0); Page.Visible = false; Page.BackgroundTransparency = 1
+        Page.Position = UDim2.new(0, 0, 0, 0)
+
+        local function CreateCol(pos)
+            local SF = Instance.new("ScrollingFrame", Page)
+            SF.Size = UDim2.new(0.5, -7, 1, 0); SF.Position = pos; SF.BackgroundTransparency = 1; SF.ScrollBarThickness = 0
+            SF.AutomaticCanvasSize = "Y"
+            SF.CanvasSize = UDim2.new(0, 0, 0, 0)
+            SF.ScrollingEnabled = false
+            
+            local function UpdateScrolling()
+                if SF.AbsoluteCanvasSize.Y > SF.AbsoluteSize.Y + 5 then
+                    SF.ScrollingEnabled = true
+                else
+                    SF.ScrollingEnabled = false
+                end
+            end
+            SF:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(UpdateScrolling)
+            SF:GetPropertyChangedSignal("AbsoluteSize"):Connect(UpdateScrolling)
+
+            Instance.new("UIListLayout", SF).Padding = UDim.new(0, 12)
+            return SF
+        end
+        local Left = CreateCol(UDim2.new(0,0,0,0))
+        local Right = CreateCol(UDim2.new(0.5,7,0,0))
 
         TBtn.MouseButton1Click:Connect(function()
             if Window.CurrentTab and Window.CurrentTab.B ~= TBtn then
-                ToggleSound:Play()
                 Window.CurrentTab.P.Visible = false
                 Window.CurrentTab.B.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
                 Window.CurrentTab.B.TextColor3 = Color3.fromRGB(180, 180, 180)
+                
                 Page.Visible = true
                 TBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
                 TBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                
                 Window.CurrentTab = {P = Page, B = TBtn}
             end
         end)
@@ -223,39 +165,106 @@ function Library:CreateWindow(cfg)
         end
 
         local Tab = {}
+
         function Tab:CreateSection(title, side)
-            local Sec = Instance.new("Frame", Page)
-            Sec.Size = UDim2.new(0.5, -7, 0, 35); Sec.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-            Sec.Position = (side == "Right" and UDim2.new(0.5, 7, 0, 0) or UDim2.new(0, 0, 0, 0))
+            local Parent = (side == "Right" and Right or Left)
+            local Sec = Instance.new("Frame", Parent)
+            Sec.Size = UDim2.new(1, 0, 0, 35); Sec.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
             Instance.new("UICorner", Sec).CornerRadius = UDim.new(0, 8)
             
             local UIList = Instance.new("UIListLayout", Sec)
             UIList.Padding = UDim.new(0, 8); UIList.HorizontalAlignment = "Center"
-            Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 35)
+            UIList.SortOrder = Enum.SortOrder.LayoutOrder
 
+            Instance.new("UIPadding", Sec).PaddingTop = UDim.new(0, 35)
+            Instance.new("UIPadding", Sec).PaddingBottom = UDim.new(0, 10)
+
+            -- [ TITLE SECTION - ĐÃ FIX VỊ TRÍ LÊN TRÊN CÙNG ]
             local SecTitle = Instance.new("TextLabel", Sec)
             SecTitle.Size = UDim2.new(1, 0, 0, 30); SecTitle.Position = UDim2.new(0, 0, 0, -35)
             SecTitle.Text = title:upper(); SecTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
             SecTitle.BackgroundTransparency = 1; SecTitle.Font = "GothamBold"; SecTitle.TextSize = 11
             SecTitle.TextXAlignment = Enum.TextXAlignment.Center
+            SecTitle.LayoutOrder = -1 -- Đảm bảo luôn ở trên cùng
 
             UIList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                Sec.Size = UDim2.new(0.5, -7, 0, UIList.AbsoluteContentSize.Y + 45)
+                Sec.Size = UDim2.new(1, 0, 0, UIList.AbsoluteContentSize.Y + 45)
             end)
 
             local Ele = {}
+            
             function Ele:AddToggle(text, cb)
                 local Tgl = Instance.new("TextButton", Sec)
                 Tgl.Size = UDim2.new(1, -16, 0, 32); Tgl.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
                 Tgl.Text = "   "..text; Tgl.TextColor3 = Color3.fromRGB(200, 200, 200); Tgl.TextXAlignment = 0; Tgl.Font = "Gotham"; Tgl.TextSize = 11
                 Instance.new("UICorner", Tgl)
+                
                 local State = false
+                local Box = Instance.new("Frame", Tgl)
+                Box.Size = UDim2.new(0, 16, 0, 16); Box.Position = UDim2.new(1, -26, 0.5, -8); Box.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
+                
+                local Circle = Instance.new("Frame", Box)
+                Circle.Size = UDim2.new(0, 0, 0, 0); Circle.Position = UDim2.new(0.5, 0, 0.5, 0)
+                Circle.AnchorPoint = Vector2.new(0.5, 0.5); Circle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+                Instance.new("UICorner", Circle).CornerRadius = UDim.new(1, 0)
+
                 Tgl.MouseButton1Click:Connect(function()
                     State = not State
-                    ToggleSound:Play()
+                    TweenService:Create(Box, TweenInfo.new(0.2), {BackgroundColor3 = State and Color3.fromRGB(0, 170, 255) or Color3.fromRGB(35, 35, 35)}):Play()
+                    TweenService:Create(Circle, TweenInfo.new(0.2), {Size = State and UDim2.new(0, 8, 0, 8) or UDim2.new(0, 0, 0, 0)}):Play()
                     cb(State)
                 end)
             end
+
+            function Ele:AddButton(text, cb)
+                local Btn = Instance.new("TextButton", Sec)
+                Btn.Size = UDim2.new(1, -16, 0, 32); Btn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+                Btn.Text = text; Btn.TextColor3 = Color3.fromRGB(255, 255, 255); Btn.Font = "GothamBold"; Btn.TextSize = 11
+                Instance.new("UICorner", Btn); Btn.MouseButton1Click:Connect(cb)
+            end
+
+            function Ele:AddDropdown(text, list, cb)
+                local Drop = Instance.new("Frame", Sec)
+                Drop.Size = UDim2.new(1, -16, 0, 32); Drop.BackgroundColor3 = Color3.fromRGB(22, 22, 22); Drop.ClipsDescendants = true
+                Instance.new("UICorner", Drop)
+                local Btn = Instance.new("TextButton", Drop)
+                Btn.Size = UDim2.new(1, 0, 0, 32); Btn.BackgroundTransparency = 1; Btn.Text = "   "..text.." :  "..(list[1] or "None")
+                Btn.TextColor3 = Color3.fromRGB(200, 200, 200); Btn.TextXAlignment = 0; Btn.Font = "Gotham"; Btn.TextSize = 11
+                
+                local SFrame = Instance.new("ScrollingFrame", Drop)
+                SFrame.Position = UDim2.new(0, 0, 0, 32); SFrame.Size = UDim2.new(1, 0, 0, 100); SFrame.BackgroundTransparency = 1; SFrame.ScrollBarThickness = 0
+                SFrame.AutomaticCanvasSize = "Y"
+                SFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+                SFrame.ScrollingEnabled = false
+                
+                local function UpdateDropScroll()
+                    if SFrame.AbsoluteCanvasSize.Y > SFrame.AbsoluteSize.Y + 2 then
+                        SFrame.ScrollingEnabled = true
+                    else
+                        SFrame.ScrollingEnabled = false
+                    end
+                end
+                SFrame:GetPropertyChangedSignal("AbsoluteCanvasSize"):Connect(UpdateDropScroll)
+
+                Instance.new("UIListLayout", SFrame)
+                local isOpened = false
+                Btn.MouseButton1Click:Connect(function()
+                    isOpened = not isOpened
+                    TweenService:Create(Drop, TweenInfo.new(0.3), {Size = isOpened and UDim2.new(1, -16, 0, 135) or UDim2.new(1, -16, 0, 32)}):Play()
+                end)
+                for _, v in pairs(list) do
+                    local Item = Instance.new("TextButton", SFrame)
+                    Item.Size = UDim2.new(1, 0, 0, 25); Item.BackgroundColor3 = Color3.fromRGB(28, 28, 28); Item.BorderSizePixel = 0
+                    Item.Text = v; Item.TextColor3 = Color3.fromRGB(150, 150, 150); Item.Font = "Gotham"; Item.TextSize = 10
+                    Item.MouseButton1Click:Connect(function()
+                        Btn.Text = "   "..text.." :  "..v; isOpened = false
+                        TweenService:Create(Drop, TweenInfo.new(0.3), {Size = UDim2.new(1, -16, 0, 32)}):Play()
+                        cb(v)
+                    end)
+                end
+            end
+
             return Ele
         end
         return Tab
